@@ -2,8 +2,20 @@
   "name": "codeaddslife.github.io",
   "version": "1.0.0",
   "description": "",
+  "scripts": {
+    "build": "node site.js",
+    "serve": "browser-sync start --server ./ --port 4200 --no-notify",
+    "start": "npm run build && npm run serve"
+  },
   "devDependencies": {
-    "browser-sync": "^2.18.8",
-    "gulp": "^3.9.1"
+    "glob": "^7.1.1",
+    "handlebars": "^4.0.6",
+    "koara": "^0.14.0",
+    "koara-html": "^0.14.0",
+    "pygments": "^0.2.1",
+    "q": "^1.4.1"
+  },
+  "dependencies": {
+    "gray-matter": "^2.1.1"
   }
 }

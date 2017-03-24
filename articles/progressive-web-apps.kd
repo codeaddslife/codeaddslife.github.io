@@ -1,0 +1,78 @@
+---
+title: How to develop progressive web apps?
+
+---
+= How to develop progressive web apps?
+
+The term [Progressive web apps](https://developers.google.com/web/progressive-web-apps/) was coined in
+[june 2015](https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/) to
+bridge the gap between web apps and native apps. This article is a deep dive into how to
+create a progressive web app.
+
+== What are progressive web apps?
+Progressive web apps (PWA) are web applications that can be installed on the home screen of your device and feels
+like a native app. It is build on the foundation of
+[Progressive enhancement](https://alistapart.com/article/understandingprogressiveenhancement) and
+[responsive web design](https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design). It should work
+for anybody anywhere and it can use more modern browser features when they are available.
+
+Progressive web apps differ from hybrid apps as they are not installed via an app store. They are updated on the server,
+which costs less to maintain since all users are on the same version. To provide a native-like user experience,
+progressive web apps make use of the Application Shell and service workers.
+
+TODO: architecture
+
+== Our example
+In this post, we will build a progressive web app for Antwerp's
+[bike renting service Velo](https://www.velo-antwerpen.be/en). A lot of cities have such a renting service nowadays as
+part of their public transport system. In our app, we want to show the availability of bikes per station, and we want to
+show the closest station, if I wanted to hop onto a bike right away. To build the app, we will use
+[Vue.js](http://vuejs.org).
+
+
+== Application Shell
+- The basic interface
+- The minimal html, css and js to power the user interface
+- pull in content dynamically through an API
+
+http://getvum.com/?
+
+== Web app manifest
+```
+<link rel="manifest" href="manifest.json">
+```
+- theme color
+
+== Service workers
+Offline and low connectivity conditions are inevitable. This is why [Offline First](http://offlinefirst.org/) is so
+important for the success of your PWA.
+
+- https://github.com/tjoskar/service-worker-exercises
+- https://github.com/pinterest/service-workers
+
+== Web app install banners
+- A web app manifest file is a simple JSON file that follows the W3C’s specification
+- To display the installation prompt, your web app needs to:
+- have a valid web app manifest file,
+- be served over HTTPS,
+- have a valid service worker registered,
+- have been visited twice, with at least five minutes between each visit.
+
+== Push Notifications
+- http://info.localytics.com/blog/push-messaging-drives-88-more-app-launches-for-users-who-opt-in
+- moet vanaf de server gesturd worden dus een manuele test hier
+- http://caniuse.com/#search=push
+
+== Security
+
+== Performance
+
+
+== Testing
+- https://github.com/GoogleChrome/lighthouse
+
+== Resources
+- [Intro to Progressive Web Apps by Google](https://www.udacity.com/course/intro-to-progressive-web-apps--ud811)
+- [Progressive Web App Summit 2016 ](https://www.youtube.com/playlist?list=PLNYkxOF6rcIAWWNR_Q6eLPhsyx6VvYjVb)
+- [Web Fundamentals](https://developers.google.com/web/fundamentals)
+- [The offline cookbook](https://jakearchibald.com/2014/offline-cookbook)

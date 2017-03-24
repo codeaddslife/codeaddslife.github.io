@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en_US">
+<meta charset=utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How to develop progressive web apps? – codeaddslife</title>
+<link rel="stylesheet" href="/main.css">
+<link rel="icon" type="image/png" href="/favicon.png">
+
+
+<div id="hd">
+    <div class="wr">
+        <a href="/"><img src="/logo.png" alt="codeaddslife"/></a>
+    </div>
+</div>
+<div class="wr">
+    <h1 id="how_to_develop_progressive_web_apps?">How to develop progressive web apps?</h1>
+
+<p>The term <a href="https://developers.google.com/web/progressive-web-apps/">Progressive web apps</a> was coined in
+<a href="https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/">june 2015</a> to
+bridge the gap between web apps and native apps. This article is a deep dive into how to
+create a progressive web app.</p>
+
+<h2 id="what_are_progressive_web_apps?">What are progressive web apps?</h2>
+
+<p>Progressive web apps (PWA) are web applications that can be installed on the home screen of your device and feels
+like a native app. It is build on the foundation of
+<a href="https://alistapart.com/article/understandingprogressiveenhancement">Progressive enhancement</a> and
+<a href="https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design">responsive web design</a>. It should work
+for anybody anywhere and it can use more modern browser features when they are available.</p>
+
+<p>Progressive web apps differ from hybrid apps as they are not installed via an app store. They are updated on the server,
+which costs less to maintain since all users are on the same version. To provide a native-like user experience,
+progressive web apps make use of the Application Shell and service workers.</p>
+
+<p>TODO: architecture</p>
+
+<h2 id="our_example">Our example</h2>
+
+<p>In this post, we will build a progressive web app for Antwerp's
+<a href="https://www.velo-antwerpen.be/en">bike renting service Velo</a>. A lot of cities have such a renting service nowadays as
+part of their public transport system. In our app, we want to show the availability of bikes per station, and we want to
+show the closest station, if I wanted to hop onto a bike right away. To build the app, we will use
+<a href="http://vuejs.org">Vue.js</a>.</p>
+
+<h2 id="application_shell">Application Shell</h2>
+
+<ul>
+  <li>The basic interface</li>
+  <li>The minimal html, css and js to power the user interface</li>
+  <li>pull in content dynamically through an API</li>
+</ul>
+
+<p>http://getvum.com/?</p>
+
+<h2 id="web_app_manifest">Web app manifest</h2>
+
+<pre><code>&lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot;&gt;</code></pre>
+
+<ul>
+  <li>theme color</li>
+</ul>
+
+<h2 id="service_workers">Service workers</h2>
+
+<p>Offline and low connectivity conditions are inevitable. This is why <a href="http://offlinefirst.org/">Offline First</a> is so
+important for the success of your PWA.</p>
+
+<ul>
+  <li>https://github.com/tjoskar/service-worker-exercises</li>
+  <li>https://github.com/pinterest/service-workers</li>
+</ul>
+
+<h2 id="web_app_install banners">Web app install banners</h2>
+
+<ul>
+  <li>A web app manifest file is a simple JSON file that follows the W3C’s specification</li>
+  <li>To display the installation prompt, your web app needs to:</li>
+  <li>have a valid web app manifest file,</li>
+  <li>be served over HTTPS,</li>
+  <li>have a valid service worker registered,</li>
+  <li>have been visited twice, with at least five minutes between each visit.</li>
+</ul>
+
+<h2 id="push_notifications">Push Notifications</h2>
+
+<ul>
+  <li>http://info.localytics.com/blog/push-messaging-drives-88-more-app-launches-for-users-who-opt-in</li>
+  <li>moet vanaf de server gesturd worden dus een manuele test hier</li>
+  <li>http://caniuse.com/#search=push</li>
+</ul>
+
+<h2 id="security">Security</h2>
+
+<h2 id="performance">Performance</h2>
+
+<h2 id="testing">Testing</h2>
+
+<ul>
+  <li>https://github.com/GoogleChrome/lighthouse</li>
+</ul>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://www.udacity.com/course/intro-to-progressive-web-apps--ud811">Intro to Progressive Web Apps by Google</a></li>
+  <li><a href="https://www.youtube.com/playlist?list=PLNYkxOF6rcIAWWNR_Q6eLPhsyx6VvYjVb">Progressive Web App Summit 2016</a></li>
+  <li><a href="https://developers.google.com/web/fundamentals">Web Fundamentals</a></li>
+  <li><a href="https://jakearchibald.com/2014/offline-cookbook">The offline cookbook</a></li>
+</ul>
+</div>
+</body>
+</html>
