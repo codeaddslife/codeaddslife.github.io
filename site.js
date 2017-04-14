@@ -1,26 +1,27 @@
-var fs = require('fs');
-var glob = require("glob")
-var Handlebars = require('handlebars');
-var koara = require('koara');
-var koaraHtml = require('koara-html');
-var matter = require('gray-matter');
-var path = require('path');
-var template = Handlebars.compile(fs.readFileSync('template.html', "utf8"));
+const fs = require('fs');
+const globby = require('globby');
+const Handlebars = require('handlebars');
+const koara = require('koara');
+const koaraHtml = require('koara-html');
+const matter = require('gray-matter');
+const mkdirp = require('mkdirp');
+const path = require('path');
 
-glob("**/*.kd", {}, function (er, files) {
-    for(i in files) {
-        var file = matter(fs.readFileSync(files[i], "utf8"));
-        var result = new koara.Parser().parse(file.content)
-        var renderer = new koaraHtml.Html5Renderer();
+var matterOptions = { parser: require('js-yaml').safeLoad }
 
-        renderer.headingIds = true;
-        result.accept(renderer);
-        file.data.body = renderer.getOutput();
+var layout = fs.readFileSync('layout.hbs').toString();
+var template = Handlebars.compile(layout);
 
-        var html = template(file.data);
-        fs.writeFileSync(path.dirname(files[i]) + "/" + path.basename(files[i], '.kd') + ".html", html);
-    }
+globby.sync('**/*.kd').forEach(function (kd) {
+    var fileMatter = matter.read(kd, matterOptions);
+    var title = fileMatter.data.title ? fileMatter.data.title + " - codeaddslife" :  "codeaddslife";
+
+    var result = new koara.Parser().parse(fileMatter.content)
+    var renderer = new koaraHtml.Html5Renderer();
+    renderer.headingIds = true;
+    result.accept(renderer);
+
+    var html = template({"title": title, "body": renderer.getOutput()});
+    mkdirp.sync(path.dirname(kd));
+    fs.writeFileSync(kd.toString().substring(0, kd.toString().length - 3) + ".html", html);
 });
-
-
-
