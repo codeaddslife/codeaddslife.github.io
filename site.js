@@ -6,11 +6,11 @@ const koaraHtml = require('koara-html');
 const matter = require('gray-matter');
 const mkdirp = require('mkdirp');
 const path = require('path');
-
 var matterOptions = { parser: require('js-yaml').safeLoad }
-
 var layout = fs.readFileSync('layout.hbs').toString();
+
 var template = Handlebars.compile(layout);
+var minify = require('html-minifier').minify;
 
 globby.sync('**/*.kd').forEach(function (kd) {
     var fileMatter = matter.read(kd, matterOptions);
@@ -22,6 +22,7 @@ globby.sync('**/*.kd').forEach(function (kd) {
     result.accept(renderer);
 
     var html = template({"title": title, "body": renderer.getOutput()});
+    var htmlMin = minify(html, {});
     mkdirp.sync(path.dirname(kd));
-    fs.writeFileSync(kd.toString().substring(0, kd.toString().length - 3) + ".html", html);
+    fs.writeFileSync(kd.toString().substring(0, kd.toString().length - 3) + ".html", htmlMin);
 });
