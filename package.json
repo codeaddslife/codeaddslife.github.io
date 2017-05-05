@@ -22,6 +22,7 @@
     "mkdirp": "^0.5.1",
     "node-sass": "^4.5.2",
     "onchange": "^3.2.1",
-    "parallelshell": "^2.0.0"
+    "parallelshell": "^2.0.0",
+    "pygments": "^0.2.1"
   }
 }
