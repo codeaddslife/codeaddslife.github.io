@@ -1,157 +1,147 @@
-<!doctype html><html lang="en_US"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Progressive web apps - codeaddslife</title><link rel="stylesheet" href="/main.css"><link rel="icon" type="image/png" href="/favicon.png"></head><body><div id="hd"><div class="wr"><a href="/"><img src="/logo.png" alt="codeaddslife"></a></div></div><div class="wr"><h1 id="progressive_web_apps">Progressive web apps</h1><p>The term <a href="https://developers.google.com/web/progressive-web-apps/">Progressive web apps</a> was coined in <a href="https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/">june 2015</a> by Alex Russell and Frances Berriman to bridge the gap between web apps and native apps. In this article, we will create a fully functioning progressive web app to show the main concepts in more detail.</p><h2 id="what_are_progressive_web_apps?">What are progressive web apps?</h2><p>Progressive web apps (PWA) are web applications that <em>progress over time</em>. If you happen to visit a website a lot, it can be great to cache some of these assets offline or to install it on the homescreen.</p><p>It is build on the foundation of <a href="https://alistapart.com/article/understandingprogressiveenhancement">progressive enhancement</a> and <a href="https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design">responsive web design</a>. Like any modern website, it should work for anybody anywhere and use more modern browser features when they are available.</p><p>Progressive web apps differ from hybrid apps as they are not installed via an app store (A process where you typically <a href="http://blog.gaborcselle.com/2012/10/every-step-costs-you-20-of-users.html">loose a lot of potential users</a>).</p><p>They are updated on the server, which costs less to maintain since all users are on the same version. PWA's rely heaviliy on service workers to provide a native app-like experience.</p><h2 id="example">Example</h2><p>In this article, we will build a progressive web app for my hometown's <a href="https://www.velo-antwerpen.be/en">bike renting service Velo</a>. A lot of cities have such a renting service nowadays as part of their public transport system. In our app, we want to show the availability of bikes per station (And also show the closest station, if you wanted to hop onto a bike right away).</p><p>TODO: velo-photo</p><p>I used <a href="vuejs.org">Vue.js</a> for this. This application is kept as simple as possible to focus on the PWA-specific parts. For a real world Vue.js application, you might want to check out Vue's <a href="https://github.com/vuejs/vue-cli">CLI tool</a>.</p><h2 id="getting_started">Getting Started</h2><p>First off, we start with a basic web application. The index.html-file will look like this:</p><div class="highlight"><pre><span></span><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-<span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">MyBike</span><span class="o">&lt;</span><span class="err">/title&gt;</span>
-        <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;icon&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;image/png&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;img/favicon.png&quot;</span><span class="o">&gt;</span>
-        <span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;main.css&quot;</span> <span class="nx">media</span><span class="o">=</span><span class="s2">&quot;all&quot;</span> <span class="o">/&gt;</span>
-        <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;viewport&quot;</span> <span class="nx">content</span><span class="o">=</span><span class="s2">&quot;width=device-width, initial-scale=1&quot;</span><span class="o">&gt;</span>
-        <span class="o">&lt;</span><span class="nx">meta</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;theme-color&quot;</span> <span class="nx">content</span><span class="o">=</span><span class="s2">&quot;#ffffff&quot;</span><span class="o">&gt;</span>
-    <span class="o">&lt;</span><span class="err">/head&gt;</span>
-    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-        <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;app&quot;</span><span class="o">&gt;</span>
-            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;logo&quot;</span><span class="o">&gt;</span>
-                <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;img/logo.png&quot;</span> <span class="nx">alt</span><span class="o">=</span><span class="s2">&quot;MyBike&quot;</span> <span class="o">/&gt;</span>
-            <span class="o">&lt;</span><span class="err">/div&gt;</span>
-            <span class="o">&lt;</span><span class="nx">ul</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;stations&quot;</span><span class="o">&gt;</span>
-                <span class="o">&lt;</span><span class="nx">li</span> <span class="nx">v</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="s2">&quot;station in stations&quot;</span><span class="o">&gt;</span>
-                    <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;station&quot;</span><span class="o">&gt;</span>
-                        <span class="o">&lt;</span><span class="nx">div</span> <span class="kr">class</span><span class="o">=</span><span class="s2">&quot;status&quot;</span><span class="o">&gt;</span>
-                            <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="s2">&quot;station.bikes == station.slots&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;img/status-full.png&quot;</span> <span class="nx">alt</span><span class="o">=</span><span class="s2">&quot;{{station.address}}&quot;</span> <span class="o">/&gt;</span>
-                            <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="s2">&quot;station.bikes &gt; 0&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;img/status-available.png&quot;</span> <span class="nx">alt</span><span class="o">=</span><span class="s2">&quot;{{station.address}}&quot;</span> <span class="o">/&gt;</span>
-                            <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="s2">&quot;station.bikes == 0&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;img/status-empty.png&quot;</span> <span class="nx">alt</span><span class="o">=</span><span class="s2">&quot;{{station.address}}&quot;</span> <span class="o">/&gt;</span>
-                            <span class="o">&lt;</span><span class="nx">img</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="s2">&quot;station.status != OPN&quot;</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;img/status-closed.png&quot;</span> <span class="nx">alt</span><span class="o">=</span><span class="s2">&quot;{{station.address}}&quot;</span> <span class="o">/&gt;</span>
-                        <span class="o">&lt;</span><span class="err">/div&gt;</span>
-                        <span class="o">&lt;</span><span class="nx">strong</span><span class="o">&gt;</span><span class="p">{{</span><span class="nx">station</span><span class="p">.</span><span class="nx">address</span><span class="p">}}</span> <span class="p">{{</span><span class="nx">station</span><span class="p">.</span><span class="nx">addressNumber</span><span class="p">}}</span><span class="o">&lt;</span><span class="err">/strong&gt;</span>
-                        <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span><span class="nx">Bikes</span><span class="o">:</span> <span class="p">{{</span><span class="nx">station</span><span class="p">.</span><span class="nx">bikes</span><span class="p">}}</span> <span class="o">-</span> <span class="nx">Slots</span> <span class="p">{{</span><span class="nx">station</span><span class="p">.</span><span class="nx">slots</span><span class="p">}}</span><span class="o">&lt;</span><span class="err">/div&gt;</span>
-                    <span class="o">&lt;</span><span class="err">/div&gt;</span>
-                <span class="o">&lt;</span><span class="err">/li&gt;</span>
-            <span class="o">&lt;</span><span class="err">/ul&gt;</span>
-        <span class="o">&lt;</span><span class="err">/div&gt;</span>
-        <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/axios.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-        <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/vue.min.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-        <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;js/app.js&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-    <span class="o">&lt;</span><span class="err">/body&gt;</span>
-<span class="o">&lt;</span><span class="err">/html&gt;</span>
-</pre></div><p>As you can see we load vue.js here, which will load a view for us based on the data that is coming back from our http request. To keep it simple, this data is a local JSON file.</p><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vue</span><span class="p">({</span>
-    <span class="nx">el</span><span class="o">:</span> <span class="s1">&#39;#app&#39;</span><span class="p">,</span>
-    <span class="nx">data</span><span class="o">:</span> <span class="p">{</span>
-        <span class="nx">stations</span><span class="o">:</span> <span class="p">[]</span>
-    <span class="p">},</span>
-    <span class="nx">beforeMount</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">loadStations</span><span class="p">();</span>
-    <span class="p">},</span>
-    <span class="nx">methods</span><span class="o">:</span> <span class="p">{</span>
-        <span class="nx">loadStations</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
-            <span class="nx">axios</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/stations.json&#39;</span><span class="p">)</span>
-                <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">self</span><span class="p">.</span><span class="nx">stations</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
-                <span class="p">})</span>
-                <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
-                <span class="p">});</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">});</span>
-</pre></div><p>We will also have some CSS for a basic design and to make this app responsive.</p><div class="highlight"><pre><span></span><span class="nx">body</span> <span class="p">{</span> <span class="nx">color</span><span class="o">:</span> <span class="err">#</span><span class="mi">242729</span><span class="p">;</span> <span class="nx">font</span><span class="o">:</span> <span class="mi">15</span><span class="nx">px</span><span class="o">/</span><span class="mf">1.3</span> <span class="nx">Arial</span><span class="p">,</span><span class="s2">&quot;Helvetica Neue&quot;</span><span class="p">,</span><span class="nx">Helvetica</span><span class="p">,</span><span class="nx">sans</span><span class="o">-</span><span class="nx">serif</span><span class="p">;</span> <span class="nx">margin</span><span class="o">:</span> <span class="mi">40</span><span class="nx">px</span> <span class="mi">0</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">small</span> <span class="p">{</span> <span class="nx">color</span><span class="o">:</span> <span class="err">#</span><span class="mi">999</span><span class="p">;</span> <span class="p">}</span>
-<span class="err">#</span><span class="nx">app</span> <span class="p">{</span> <span class="nx">margin</span><span class="o">:</span> <span class="mi">0</span> <span class="nx">auto</span><span class="p">;</span> <span class="nx">max</span><span class="o">-</span><span class="nx">width</span><span class="o">:</span> <span class="mi">700</span><span class="nx">px</span><span class="p">;</span> <span class="p">}</span>
-<span class="err">#</span><span class="nx">logo</span> <span class="p">{</span> <span class="nx">margin</span><span class="o">-</span><span class="nx">bottom</span><span class="o">:</span> <span class="mi">40</span><span class="nx">px</span><span class="p">;</span> <span class="nx">text</span><span class="o">-</span><span class="nx">align</span><span class="o">:</span> <span class="nx">center</span><span class="p">;</span> <span class="p">}</span>
-<span class="err">#</span><span class="nx">logo</span> <span class="nx">img</span> <span class="p">{</span> <span class="nx">width</span><span class="o">:</span> <span class="mi">100</span><span class="nx">px</span><span class="p">;</span> <span class="nx">height</span><span class="o">:</span> <span class="nx">auto</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">ul</span><span class="p">.</span><span class="nx">stations</span> <span class="p">{</span> <span class="nx">list</span><span class="o">-</span><span class="nx">style</span><span class="o">:</span> <span class="nx">none</span><span class="p">;</span> <span class="nx">margin</span><span class="o">:</span> <span class="mi">0</span> <span class="mi">20</span><span class="nx">px</span><span class="p">;</span> <span class="nx">padding</span><span class="o">:</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">position</span><span class="o">:</span> <span class="nx">relative</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">ul</span><span class="p">.</span><span class="nx">stations</span> <span class="nx">li</span> <span class="p">{</span> <span class="nx">border</span><span class="o">-</span><span class="nx">bottom</span><span class="o">:</span> <span class="mi">1</span><span class="nx">px</span> <span class="nx">solid</span> <span class="err">#</span><span class="nx">e4e6e8</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">ul</span><span class="p">.</span><span class="nx">stations</span> <span class="nx">li</span> <span class="nx">div</span><span class="p">.</span><span class="nx">station</span> <span class="p">{</span> <span class="nx">margin</span><span class="o">-</span><span class="nx">bottom</span><span class="o">:</span> <span class="mi">10</span><span class="nx">px</span><span class="p">;</span> <span class="nx">margin</span><span class="o">-</span><span class="nx">top</span><span class="o">:</span> <span class="mi">10</span><span class="nx">px</span><span class="p">;</span> <span class="nx">margin</span><span class="o">-</span><span class="nx">left</span><span class="o">:</span> <span class="mi">58</span><span class="nx">px</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">ul</span><span class="p">.</span><span class="nx">stations</span> <span class="nx">li</span> <span class="nx">div</span><span class="p">.</span><span class="nx">station</span><span class="o">:</span><span class="nx">after</span> <span class="p">{</span> <span class="nx">content</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">;</span> <span class="nx">display</span><span class="o">:</span> <span class="nx">block</span><span class="p">;</span> <span class="nx">clear</span><span class="o">:</span> <span class="nx">both</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">ul</span><span class="p">.</span><span class="nx">stations</span> <span class="nx">li</span> <span class="nx">div</span><span class="p">.</span><span class="nx">station</span> <span class="nx">div</span><span class="p">.</span><span class="nx">status</span> <span class="p">{</span> <span class="nx">border</span><span class="o">-</span><span class="nx">radius</span><span class="o">:</span> <span class="mi">50</span><span class="o">%</span><span class="p">;</span> <span class="kr">float</span><span class="o">:</span> <span class="nx">left</span><span class="p">;</span> <span class="nx">margin</span><span class="o">-</span><span class="nx">left</span><span class="o">:</span> <span class="o">-</span><span class="mi">58</span><span class="nx">px</span><span class="p">;</span> <span class="nx">width</span><span class="o">:</span> <span class="mi">48</span><span class="nx">px</span><span class="p">;</span> <span class="p">}</span>
-<span class="nx">ul</span><span class="p">.</span><span class="nx">stations</span> <span class="nx">li</span> <span class="nx">div</span><span class="p">.</span><span class="nx">station</span> <span class="nx">div</span><span class="p">.</span><span class="nx">status</span> <span class="nx">img</span> <span class="p">{</span> <span class="nx">width</span><span class="o">:</span> <span class="mi">48</span><span class="nx">px</span><span class="p">;</span> <span class="p">}</span>
-</pre></div><p>To see the example for yourself, type the following commands:</p><div class="highlight"><pre><span></span><span class="nx">npm</span> <span class="nx">install</span> <span class="o">-</span><span class="nx">g</span> <span class="nx">browser</span><span class="o">-</span><span class="nx">sync</span>
-<span class="nx">npm</span> <span class="nx">start</span>
-</pre></div><p>The app will now render beautifully on the different browsers.</p><p>TODO: screenshots</p><h1 id="service_workers">Service workers</h1><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Service workers</a> are a big part of PWAs. They allow you to develop <a href="http://offlinefirst.org/">offline first</a>. A service worker is a javascript process that runs separately and acts as a programmable proxy between your application and the network. To avoid <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man-in-the-middle attacks</a>, service workers have to run over https.</p><p>In order to notify the browser that you have a service worker available, you have to register it on load. We do this in the our <code>app.js</code> file. We also check if serviceWorker is a know feature in our browser, so when it's not, the app will not crash.</p><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="s1">&#39;serviceWorker&#39;</span> <span class="k">in</span> <span class="nx">navigator</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">navigator</span><span class="p">.</span><span class="nx">serviceWorker</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="s1">&#39;/sw.js&#39;</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;ServiceWorker registration successful&#39;</span><span class="p">);</span>
-    <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;ServiceWorker registration failed: &#39;</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-    <span class="p">});</span>
-<span class="p">}</span>
-</pre></div><p>If you look at the code, you see that we register a seperate javascript file here. This is necassary as the service worker will run seperate from your other javascript code. The service worker also has no access to your DOM. <code>sw.js</code> should be created at the root-level, so not inside the js-folder.</p><p>Let's create <code>sw.js</code>:</p><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">CACHE_NAME</span> <span class="o">=</span> <span class="s1">&#39;my-bike-v1 &#39;</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">CACHED_URLS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;/&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/favicon.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/icon-120.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/icon-144.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/icon-152.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/icon-192.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/icon-384.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/logo.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/status-available.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/status-closed.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/status-empty.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/img/status-full.png&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/js/axios.min.js&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/js/vue.min.js&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/js/app.js&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;/main.css&#39;</span>
-<span class="p">];</span>
+<!doctype html><html lang="en_US"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Progressive web apps - codeaddslife</title><link rel="stylesheet" href="/main.css"><link rel="icon" type="image/png" href="/favicon.png"></head><body><div id="hd"><div class="wr"><a href="/"><img src="/logo.png" alt="codeaddslife"></a></div></div><div class="wr"><h1 id="progressive_web_apps">Progressive web apps</h1><p>The term <a href="https://developers.google.com/web/progressive-web-apps/">Progressive web apps</a> was coined in <a href="https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/">june 2015</a> by Alex Russell and Frances Berriman to bridge the gap between web apps and native apps. In this article, we will create a fully functioning progressive web app to show the main concepts in more detail.</p><h2 id="what_are_progressive_web_apps?">What are progressive web apps?</h2><p>Progressive web apps (PWA) are web applications that <em>progress over time</em>. If you happen to visit a website a lot, it can be great to cache some of these assets offline or to install it on the homescreen.</p><p>It is build on the foundation of <a href="https://alistapart.com/article/understandingprogressiveenhancement">progressive enhancement</a> and <a href="https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design">responsive web design</a>. Like any modern website, it should work for anybody anywhere and use more modern browser features when they are available.</p><p>Progressive web apps differ from hybrid apps as they are not installed via an app store (A process where you typically <a href="http://blog.gaborcselle.com/2012/10/every-step-costs-you-20-of-users.html">loose a lot of potential users</a>).</p><p>They are updated on the server, which costs less to maintain since all users are on the same version. PWA's rely heaviliy on service workers to provide a native app-like experience.</p><h2 id="example">Example</h2><p>In this article, we will build a progressive web app for my hometown's <a href="https://www.velo-antwerpen.be/en">bike renting service Velo</a>. A lot of cities have such a renting service nowadays as part of their public transport system. In our app, we want to show the availability of bikes per station (And also show the closest station, if you wanted to hop onto a bike right away).</p><p>TODO: velo-photo</p><p>I used <a href="vuejs.org">Vue.js</a> for this. This application is kept as simple as possible to focus on the PWA-specific parts. For a real world Vue.js application, you might want to check out Vue's <a href="https://github.com/vuejs/vue-cli">CLI tool</a>.</p><h2 id="getting_started">Getting Started</h2><p>First off, we start with a basic web application. The index.html-file will look like this:</p><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;MyBike&lt;/title&gt;
+        &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;img/favicon.png&quot;&gt;
+        &lt;link rel=&quot;stylesheet&quot; href=&quot;main.css&quot; media=&quot;all&quot; /&gt;
+        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+        &lt;meta name=&quot;theme-color&quot; content=&quot;#ffffff&quot;&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div id=&quot;app&quot;&gt;
+            &lt;div id=&quot;logo&quot;&gt;
+                &lt;img src=&quot;img/logo.png&quot; alt=&quot;MyBike&quot; /&gt;
+            &lt;/div&gt;
+            &lt;ul class=&quot;stations&quot;&gt;
+                &lt;li v-for=&quot;station in stations&quot;&gt;
+                    &lt;div class=&quot;station&quot;&gt;
+                        &lt;div class=&quot;status&quot;&gt;
+                            &lt;img v-if=&quot;station.bikes == station.slots&quot; src=&quot;img/status-full.png&quot; alt=&quot;{{station.address}}&quot; /&gt;
+                            &lt;img v-else-if=&quot;station.bikes &gt; 0&quot; src=&quot;img/status-available.png&quot; alt=&quot;{{station.address}}&quot; /&gt;
+                            &lt;img v-else-if=&quot;station.bikes == 0&quot; src=&quot;img/status-empty.png&quot; alt=&quot;{{station.address}}&quot; /&gt;
+                            &lt;img v-else-if=&quot;station.status != OPN&quot; src=&quot;img/status-closed.png&quot; alt=&quot;{{station.address}}&quot; /&gt;
+                        &lt;/div&gt;
+                        &lt;strong&gt;{{station.address}} {{station.addressNumber}}&lt;/strong&gt;
+                        &lt;div&gt;Bikes: {{station.bikes}} - Slots {{station.slots}}&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+        &lt;script src=&quot;js/axios.min.js&quot;&gt;&lt;/script&gt;
+        &lt;script src=&quot;js/vue.min.js&quot;&gt;&lt;/script&gt;
+        &lt;script src=&quot;js/app.js&quot;&gt;&lt;/script&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre><p>As you can see we load vue.js here, which will load a view for us based on the data that is coming back from our http request. To keep it simple, this data is a local JSON file.</p><pre><code>var app = new Vue({
+    el: '#app',
+    data: {
+        stations: []
+    },
+    beforeMount: function () {
+        this.loadStations();
+    },
+    methods: {
+        loadStations: function () {
+            var self = this;
+            axios.get('/stations.json')
+                .then(function (response) {
+                    self.stations = response.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+});</code></pre><p>We will also have some CSS for a basic design and to make this app responsive.</p><pre><code>body { color: #242729; font: 15px/1.3 Arial,&quot;Helvetica Neue&quot;,Helvetica,sans-serif; margin: 40px 0; }
+small { color: #999; }
+#app { margin: 0 auto; max-width: 700px; }
+#logo { margin-bottom: 40px; text-align: center; }
+#logo img { width: 100px; height: auto; }
+ul.stations { list-style: none; margin: 0 20px; padding: 0; position: relative; }
+ul.stations li { border-bottom: 1px solid #e4e6e8; }
+ul.stations li div.station { margin-bottom: 10px; margin-top: 10px; margin-left: 58px; }
+ul.stations li div.station:after { content: ''; display: block; clear: both; }
+ul.stations li div.station div.status { border-radius: 50%; float: left; margin-left: -58px; width: 48px; }
+ul.stations li div.station div.status img { width: 48px; }</code></pre><p>To see the example for yourself, type the following commands:</p><pre><code>npm install -g browser-sync
+npm start</code></pre><p>The app will now render beautifully on the different browsers.</p><p>TODO: screenshots</p><h1 id="service_workers">Service workers</h1><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Service workers</a> are a big part of PWAs. They allow you to develop <a href="http://offlinefirst.org/">offline first</a>. A service worker is a javascript process that runs separately and acts as a programmable proxy between your application and the network. To avoid <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man-in-the-middle attacks</a>, service workers have to run over https.</p><p>In order to notify the browser that you have a service worker available, you have to register it on load. We do this in the our <code>app.js</code> file. We also check if serviceWorker is a know feature in our browser, so when it's not, the app will not crash.</p><pre><code>if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(function() {
+        console.log('ServiceWorker registration successful');
+    }).catch(function(err) {
+        console.log('ServiceWorker registration failed: ', err);
+    });
+}</code></pre><p>If you look at the code, you see that we register a seperate javascript file here. This is necassary as the service worker will run seperate from your other javascript code. The service worker also has no access to your DOM. <code>sw.js</code> should be created at the root-level, so not inside the js-folder.</p><p>Let's create <code>sw.js</code>:</p><pre><code class="language-javascript">var CACHE_NAME = 'my-bike-v1 ';
+var CACHED_URLS = [
+    '/',
+    '/img/favicon.png',
+    '/img/icon-120.png',
+    '/img/icon-144.png',
+    '/img/icon-152.png',
+    '/img/icon-192.png',
+    '/img/icon-384.png',
+    '/img/logo.png',
+    '/img/status-available.png',
+    '/img/status-closed.png',
+    '/img/status-empty.png',
+    '/img/status-full.png',
+    '/js/axios.min.js',
+    '/js/vue.min.js',
+    '/js/app.js',
+    '/main.css'
+];
 
-<span class="nx">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;install&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">event</span><span class="p">.</span><span class="nx">waitUntil</span><span class="p">(</span>
-        <span class="nx">caches</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="nx">CACHE_NAME</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">cache</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="nx">cache</span><span class="p">.</span><span class="nx">addAll</span><span class="p">(</span><span class="nx">CACHED_URLS</span><span class="p">);</span>
-        <span class="p">})</span>
-    <span class="p">);</span>
+self.addEventListener('install', function(event) {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(function(cache) {
+            return cache.addAll(CACHED_URLS);
+        })
+    );
 
-<span class="p">});</span>
-</pre></div><p>What happens here? A service worker has a specific <a href="https://developers.google.com/web/fundamentals/instant-and-offline/service-worker/lifecycle">lifecycle</a> When a service worker is found, the browser will try to install it. <code>CACHED_URLS</code> contains all url's that need to be cached. This idea follows the <a href="https://developers.google.com/web/fundamentals/architecture/app-shell">app shell architecture</a>, where you cache all static assets, to startup the application very quickly. In our case, these are all used files, without the station.json file, as this is the dynamic data here.</p><p>If you try to cache a file that cannot be retrieved, the service worker won't be installed</p><p><img src="/img/0002_error_sw.png" alt="Service Worker failed to install"></p><p>Once the ServiceWorker is installed, we can listen to the activate-event.</p><div class="highlight"><pre><span></span><span class="nx">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;activate&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">event</span><span class="p">.</span><span class="nx">waitUntil</span><span class="p">(</span>
-        <span class="nx">caches</span><span class="p">.</span><span class="nx">keys</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">cacheNames</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">cacheNames</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">cacheName</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nx">CACHE_NAME</span> <span class="o">!==</span> <span class="nx">cacheName</span> <span class="o">&amp;&amp;</span> <span class="nx">cacheName</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s1">&#39;my-bike&#39;</span><span class="p">))</span> <span class="p">{</span>
-                    <span class="k">return</span> <span class="nx">caches</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="nx">cacheName</span><span class="p">);</span>
-                <span class="p">}</span>
-            <span class="p">})</span>
-        <span class="p">})</span>
-    <span class="p">);</span>
-<span class="p">});</span>
-</pre></div><p>There is a difference between a ServiceWorker being installed and the ServiceWorker becoming activated. In our code, we want to listen to activate-events, because when a new version of the ServiceWorker becomes active, we want to delete our old cache. This is also why <code>CACHE_NAME</code> has a version (v1) in it's name. A new version will become v2.</p><p>The last part are fetch 'events'. When the service worker is installed, every request will trigger a fetch event. Inside this event, we can now return our cached resource, if we have one available.</p><p>Keep in mind that cached resource are only returned the second time you visit the application, as the first time you were still installing it. Also keep in mind that when you develop, especially on localhost, that the cache will kick it. Don't forget to clear the cache, or just to open a private window so you don't get confused.</p><div class="highlight"><pre><span></span><span class="nx">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;fetch&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">event</span><span class="p">.</span><span class="nx">respondWith</span><span class="p">(</span>
-        <span class="nx">caches</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="nx">response</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">return</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">);</span>
-        <span class="p">})</span>
-    <span class="p">);</span>
-<span class="p">});</span>
-</pre></div><p>There are a lot of <a href="https://github.com/tjoskar/service-worker-exercises">examples</a> available for service workers. Keep in mind that service workers are a relatively new feature, so <a href="https://jakearchibald.github.io/isserviceworkerready">not all browsers support all features yet</a></p><h2 id="web_app_manifest">Web App Manifest</h2><p>A web app manifest is a JSON file that follows the <a href="https://www.w3.org/TR/appmanifest">W3C’s specification</a>. It gives some metadata and notifies the browser that this application can be installed on the home screen.</p><p>The file should be added as a link-tag in the html file:</p><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nx">link</span> <span class="nx">rel</span><span class="o">=</span><span class="s2">&quot;manifest&quot;</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;manifest.json&quot;</span><span class="o">&gt;</span>
-</pre></div><p>The file itself is a json-file with the options that you specify.</p><div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;MyBike&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;short_name&quot;</span><span class="o">:</span> <span class="s2">&quot;MyBike&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;start_url&quot;</span><span class="o">:</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;display&quot;</span><span class="o">:</span> <span class="s2">&quot;standalone&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;theme_color&quot;</span><span class="o">:</span> <span class="s2">&quot;#fff&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;background_color&quot;</span><span class="o">:</span> <span class="s2">&quot;#fff&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;orientation&quot;</span><span class="o">:</span> <span class="s2">&quot;portrait&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;description&quot;</span><span class="o">:</span> <span class="s2">&quot;An app for renting bikes&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;icons&quot;</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">&quot;src&quot;</span><span class="o">:</span> <span class="s2">&quot;img/icon-120.png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sizes&quot;</span><span class="o">:</span> <span class="s2">&quot;120x120&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;image/png&quot;</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">&quot;src&quot;</span><span class="o">:</span> <span class="s2">&quot;img/icon-144.png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sizes&quot;</span><span class="o">:</span> <span class="s2">&quot;144x144&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;image/png&quot;</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">&quot;src&quot;</span><span class="o">:</span> <span class="s2">&quot;img/icon-152.png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sizes&quot;</span><span class="o">:</span> <span class="s2">&quot;152x152&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;image/png&quot;</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">&quot;src&quot;</span><span class="o">:</span> <span class="s2">&quot;img/icon-192.png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sizes&quot;</span><span class="o">:</span> <span class="s2">&quot;192x192&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;image/png&quot;</span>
-  <span class="p">},{</span>
-    <span class="s2">&quot;src&quot;</span><span class="o">:</span> <span class="s2">&quot;img/icon-384.png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sizes&quot;</span><span class="o">:</span> <span class="s2">&quot;384x384&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;image/png&quot;</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div><p>The display option represents the preferred display mode, once it is opened from the home screen. In most cases, standalone will be the best option for a progressive web app.</p><p>TODO: display 'fullscreen', 'browser', 'standalone'. If you configured the web app manifest correctly, the browser might decide to show an <a href="https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/">Install Banner</a>. When and if the install banner is opened is browser-specifc and can be changed over time.</p><h2 id="source_code">Source code</h2><p><a href="https://github.com/optis/mybike">https://github.com/optis/mybike</a></p><h2 id="resources">Resources</h2></div></body></html>
+});</code></pre><p>What happens here? A service worker has a specific <a href="https://developers.google.com/web/fundamentals/instant-and-offline/service-worker/lifecycle">lifecycle</a> When a service worker is found, the browser will try to install it. <code>CACHED_URLS</code> contains all url's that need to be cached. This idea follows the <a href="https://developers.google.com/web/fundamentals/architecture/app-shell">app shell architecture</a>, where you cache all static assets, to startup the application very quickly. In our case, these are all used files, without the station.json file, as this is the dynamic data here.</p><p>If you try to cache a file that cannot be retrieved, the service worker won't be installed</p><p><img src="/img/0002_error_sw.png" alt="Service Worker failed to install"></p><p>Once the ServiceWorker is installed, we can listen to the activate-event.</p><pre><code class="language-javascript">self.addEventListener('activate', function(event) {
+    event.waitUntil(
+        caches.keys().then(function(cacheNames) {
+            cacheNames.map(function(cacheName) {
+                if (CACHE_NAME !== cacheName &amp;&amp; cacheName.startsWith('my-bike')) {
+                    return caches.delete(cacheName);
+                }
+            })
+        })
+    );
+});</code></pre><p>There is a difference between a ServiceWorker being installed and the ServiceWorker becoming activated. In our code, we want to listen to activate-events, because when a new version of the ServiceWorker becomes active, we want to delete our old cache. This is also why <code>CACHE_NAME</code> has a version (v1) in it's name. A new version will become v2.</p><p>The last part are fetch 'events'. When the service worker is installed, every request will trigger a fetch event. Inside this event, we can now return our cached resource, if we have one available.</p><p>Keep in mind that cached resource are only returned the second time you visit the application, as the first time you were still installing it. Also keep in mind that when you develop, especially on localhost, that the cache will kick it. Don't forget to clear the cache, or just to open a private window so you don't get confused.</p><pre><code class="language-javascript">self.addEventListener('fetch', function(event) {
+    event.respondWith(
+        caches.match(event.request).then(function(response) {
+            if (response) {
+                return response;
+            }
+            return fetch(event.request);
+        })
+    );
+});</code></pre><p>There are a lot of <a href="https://github.com/tjoskar/service-worker-exercises">examples</a> available for service workers. Keep in mind that service workers are a relatively new feature, so <a href="https://jakearchibald.github.io/isserviceworkerready">not all browsers support all features yet</a></p><h2 id="web_app_manifest">Web App Manifest</h2><p>A web app manifest is a JSON file that follows the <a href="https://www.w3.org/TR/appmanifest">W3C’s specification</a>. It gives some metadata and notifies the browser that this application can be installed on the home screen.</p><p>The file should be added as a link-tag in the html file:</p><pre><code>&lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot;&gt;</code></pre><p>The file itself is a json-file with the options that you specify.</p><pre><code>{
+  &quot;name&quot;: &quot;MyBike&quot;,
+  &quot;short_name&quot;: &quot;MyBike&quot;,
+  &quot;start_url&quot;: &quot;.&quot;,
+  &quot;display&quot;: &quot;standalone&quot;,
+  &quot;theme_color&quot;: &quot;#fff&quot;,
+  &quot;background_color&quot;: &quot;#fff&quot;,
+  &quot;orientation&quot;: &quot;portrait&quot;,
+  &quot;description&quot;: &quot;An app for renting bikes&quot;,
+  &quot;icons&quot;: [{
+    &quot;src&quot;: &quot;img/icon-120.png&quot;,
+    &quot;sizes&quot;: &quot;120x120&quot;,
+    &quot;type&quot;: &quot;image/png&quot;
+  }, {
+    &quot;src&quot;: &quot;img/icon-144.png&quot;,
+    &quot;sizes&quot;: &quot;144x144&quot;,
+    &quot;type&quot;: &quot;image/png&quot;
+  }, {
+    &quot;src&quot;: &quot;img/icon-152.png&quot;,
+    &quot;sizes&quot;: &quot;152x152&quot;,
+    &quot;type&quot;: &quot;image/png&quot;
+  }, {
+    &quot;src&quot;: &quot;img/icon-192.png&quot;,
+    &quot;sizes&quot;: &quot;192x192&quot;,
+    &quot;type&quot;: &quot;image/png&quot;
+  },{
+    &quot;src&quot;: &quot;img/icon-384.png&quot;,
+    &quot;sizes&quot;: &quot;384x384&quot;,
+    &quot;type&quot;: &quot;image/png&quot;
+  }]
+}</code></pre><p>The display option represents the preferred display mode, once it is opened from the home screen. In most cases, standalone will be the best option for a progressive web app.</p><p>TODO: display 'fullscreen', 'browser', 'standalone'. If you configured the web app manifest correctly, the browser might decide to show an <a href="https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/">Install Banner</a>. When and if the install banner is opened is browser-specifc and can be changed over time.</p><h2 id="source_code">Source code</h2><p><a href="https://github.com/optis/mybike">https://github.com/optis/mybike</a></p><h2 id="resources">Resources</h2></div></body></html>

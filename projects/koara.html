@@ -1,0 +1,73 @@
+<!doctype html><html lang="en_US"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>codeaddslife</title><link rel="stylesheet" href="/main.css"><link rel="icon" type="image/png" href="/favicon.png"></head><body><div id="hd"><div class="wr"><a href="/"><img src="/logo.png" alt="codeaddslife"></a></div></div><div class="wr"><h1 id="koara">Koara</h1><h2 id="1._introduction">1. Introduction</h2><p>When building an application you can allow a <a href="https://en.wikipedia.org/wiki/Lightweight_markup_language">lightweight markup language</a> to enhance the user's writing experience. These languages are rather inflexible. You either allow all the syntax or nothing. This is not always appropriate, so most developers end up creating a custom language or fork of an existing language. It requires the user to each time learn a different language and jeopardizes portability between applications.</p><p>Koara is a modular lightweight markup language. The developer decides which parts of the syntax are allowed to be parsed. The rest will render as plain text.</p><h2 id="2._syntax">2. Syntax</h2><h3 id="2.1_paragraphs">2.1 Paragraphs</h3><p><em>Koara:</em></p><pre><code>This is a simple paragraph.
+
+If you want to create a line break,
+end a line with two or more spaces</code></pre><p><em>HTML:</em></p><pre><code>&lt;p&gt;This is a simple paragraph.&lt;/p&gt;
+
+&lt;p&gt;If you want to create a line break,&lt;br&gt;
+end a line with two or more spaces&lt;/p&gt;</code></pre><p>If enabled, any default block element will become a paragraph. Paragraphs are separated by one or more blank lines. Koara uses soft wrapping, which means that a newline character will not result in an actual linebreak. If you do want a hard linebreak, you should end a line with 2 or more spaces.</p><h3 id="2.2_headings">2.2 Headings</h3><p><em>Koara:</em></p><pre><code>= Heading 1
+== Heading 2
+=== Heading 3
+==== Heading 4
+===== Heading 5
+====== Heading 6
+\= A heading can be escaped like this.</code></pre><p><em>HTML:</em></p><pre><code>&lt;h1&gt;Heading 1&lt;/h1&gt;
+
+&lt;h2&gt;Heading 2&lt;/h2&gt;
+
+&lt;h3&gt;Heading 3&lt;/h3&gt;
+
+&lt;h4&gt;Heading 4&lt;/h4&gt;
+
+&lt;h5&gt;Heading 5&lt;/h5&gt;
+
+&lt;h6&gt;Heading 6&lt;/h6&gt;
+
+&lt;p&gt;= A heading can be escaped like this.&lt;/p&gt;</code></pre><p>If enabled and a line starts with equal signs, it is considered a heading. The largest heading level is 6. Whitespace or blank lines are always optional in Koara.</p><p><strong>Escaping</strong>: If you don't want Koara to parse a line as a heading, escape the equal sign by prepending a backslash. You can also escape all other characters used in the syntax.</p><h3 id="2.3_lists">2.3 Lists</h3><p><em>Koara:</em></p><pre><code>- Item 1
+- Item 2
+    - Item 2A
+    - Item 2B
+1. Item 1
+2. Item 2
+    1. Item 2A
+    4. Item 2B</code></pre><p><em>HTML:</em></p><pre><code>&lt;ul&gt;
+  &lt;li&gt;Item 1&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Item 2&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Item 2A&lt;/li&gt;
+      &lt;li&gt;Item 2B&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Item 1&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Item 2&lt;/p&gt;
+    &lt;ol&gt;
+      &lt;li&gt;Item 2A&lt;/li&gt;
+      &lt;li value=&quot;4&quot;&gt;Item 2B&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</code></pre><p>Unordered lists start with a dash before the item. Ordered lists start with a digit, followed by a dot. You can use any digit, Koara will preserve the numbering when parsed.</p><p>To create sublist-items you have to use indentation. Default indentation is 2 spaces or a tab. List items can consist of multiple block elements. Because these can contain blank lines, you have to use at least 2 blank lines to break out of the list or start a new block without indentation.</p><h3 id="2.4_links">2.4 Links</h3><p><em>Koara:</em></p><pre><code>This is an [internal link].
+This is an [inline link](http://www.google.com).</code></pre><p><em>HTML:</em></p><pre><code>&lt;p&gt;This is an &lt;a href=&quot;&quot;&gt;internal link&lt;/a&gt;.&lt;br&gt;
+This is an &lt;a href=&quot;http://www.google.com&quot;&gt;inline link&lt;/a&gt;.&lt;/p&gt;</code></pre><p>Koara supports internal and inline links. Internal links are useful for wiki and CMS applications. By default it returns an empty link because the url should be resolved by the application.</p><p>Inline links are simply a combination of the link text and the url.</p><h3 id="2.5_images">2.5 Images</h3><p><em>Koara:</em></p><pre><code>This is an [image:internal image]
+This is an [image:inline image](http://www.koara.io/logo.png)</code></pre><p><em>HTML:</em></p><pre><code>&lt;p&gt;This is an &lt;img src=&quot;&quot; alt=&quot;internal image&quot; /&gt;&lt;br&gt;
+This is an &lt;img src=&quot;http://www.koara.io/logo.png&quot; alt=&quot;inline image&quot; /&gt;&lt;/p&gt;</code></pre><p>Images work exactly the same as links except they have an image: label.</p><p>Images and links are both resources. If you configure the parser to allow links but not images, the syntax will give you a natural fallback: Images will then become links with a prefix image: in the title.</p><h3 id="2.6_formatting">2.6 Formatting</h3><p><em>Koara:</em></p><pre><code>Koara supports *strong* and _emphasis_
+
+You can format *more than
+one line*</code></pre><p><em>HTML:</em></p><pre><code>&lt;p&gt;Koara supports &lt;strong&gt;strong&lt;/strong&gt; and &lt;em&gt;emphasis&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;You can format &lt;strong&gt;more than&lt;br&gt;
+one line&lt;/strong&gt;&lt;/p&gt;</code></pre><p>If enabled, text between asterisks will be rendered as bold text, text between underscores will be rendered as italic text</p><p>Formatting can span over multiple lines, and intraword emphasis is allowed.</p><h3 id="2.7_blockquotes">2.7 Blockquotes</h3><p><em>Koara:</em></p><pre><code> Blockquote 1
+ Blockquote 2
+ Blockquote 3</code></pre><p><em>HTML:</em></p><pre><code>&lt;blockquote&gt;
+  &lt;p&gt;Blockquote 1&lt;/p&gt;
+  &lt;blockquote&gt;
+    &lt;p&gt;Blockquote 2&lt;/p&gt;
+    &lt;blockquote&gt;
+      &lt;p&gt;Blockquote 3&lt;/p&gt;
+    &lt;/blockquote&gt;
+  &lt;/blockquote&gt;
+&lt;/blockquote&gt;</code></pre><p>If enabled, you can use email-style blockquoting. Blockquotes can also be nested.</p><h3 id="2.8_code">2.8 Code</h3><p><em>Koara:</em></p><pre><code>Inline `code` works with backticks. You can also create a fenced code block
+</code></pre><p><em>HTML:</em></p><pre><code>&lt;p&gt;Inline &lt;code&gt;code&lt;/code&gt; works with backticks. You can also create a fenced code block&lt;/p&gt;</code></pre><p>If enabled, text between backticks will be rendered as code text. It can span over multiple lines.</p><p>Koara also support fenced code blocks. A fenced code block starts at the beginning of a line with at least 3 backticks. It can contain an optional 'language' identifier.</p></div></body></html>
