@@ -7,7 +7,7 @@ var app = new Vue({
     },
     beforeMount: function () {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(function(registration) {
+            navigator.serviceWorker.register('../sw.js').then(function(registration) {
                 console.log('ServiceWorker registration successful');
 `
 `
