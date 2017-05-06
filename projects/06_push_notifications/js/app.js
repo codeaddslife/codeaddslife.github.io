@@ -7,7 +7,7 @@ var app = new Vue({
     },
     beforeMount: function () {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
                 console.log('ServiceWorker registration successful');
 `
 `
@@ -44,7 +44,7 @@ var app = new Vue({
             return d;
         },
         loadStations: function () {
-            axios.get('/stations.json')
+            axios.get('stations.json')
                 .then(function (response) {
                     this.stations = response.data;
                     this.lastUpdated = new Date().toLocaleString();
