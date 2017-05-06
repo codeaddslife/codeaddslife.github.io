@@ -44,7 +44,7 @@ var app = new Vue({
             return d;
         },
         loadStations: function () {
-            axios.get('stations.json')
+            axios.get('/projects/06_push_notifications/stations.json')
                 .then(function (response) {
                     this.stations = response.data;
                     this.lastUpdated = new Date().toLocaleString();
