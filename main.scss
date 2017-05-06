@@ -1,12 +1,12 @@
-// BRAND COLOR: #005A79
+$brand-color: #005A79;
 
 body { margin: 0 0 120px 0; padding: 0; font:18px/1.5 Georgia,serif; }
 .wr { width: 740px; margin: 0 auto; }
 #hd { border-bottom: 1px solid #eee; margin: 0; }
 #hd a { display: block; border: none; margin: 20px; }
 #hd a img { width: 210px;}
-a { color:#000; border-bottom:1px solid #000; text-decoration:none; }
-h1 { line-height: 1.2; margin: 100px 20px 40px 20px; font-size:2.1em;font-weight:bold; }
+a { color: $brand-color; border-bottom:1px solid $brand-color; text-decoration:none; }
+h1 { line-height: 1.2; margin: 60px 20px 40px 20px; font-size:2.1em;font-weight:bold; }
 h2 { margin:40px 20px 10px 20px; font-size:1.4em; font-weight:bold; }
 h3 { margin:20px 20px 10px 20px; font-size:1.2em; font-weight:bold; }
 p { margin:20px;}

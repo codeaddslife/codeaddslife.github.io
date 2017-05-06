@@ -6,7 +6,7 @@
     "build": "npm run build:kd && npm run build:css",
     "build:kd": "node site.js",
     "build:css": "node-sass --output-style compressed main.scss > main.css",
-    "serve": "browser-sync start --no-notify -s . -f .",
+    "serve": "browser-sync start --no-notify --port 8000 -s . -f .",
     "start": "npm run build && parallelshell 'npm run serve' 'npm run watch:css' 'npm run watch:kd'",
     "watch:css": "onchange 'main.scss' -- npm run build:css",
     "watch:kd": "onchange '**/*.kd' -- npm run build:kd"
