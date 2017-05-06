@@ -144,4 +144,102 @@ self.addEventListener('install', function(event) {
     &quot;sizes&quot;: &quot;384x384&quot;,
     &quot;type&quot;: &quot;image/png&quot;
   }]
-}</code></pre><p>The display option represents the preferred display mode, once it is opened from the home screen. In most cases, standalone will be the best option for a progressive web app.</p><p>TODO: display 'fullscreen', 'browser', 'standalone'. If you configured the web app manifest correctly, the browser might decide to show an <a href="https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/">Install Banner</a>. When and if the install banner is opened is browser-specifc and can be changed over time.</p><h2 id="source_code">Source code</h2><p><a href="https://github.com/optis/mybike">https://github.com/optis/mybike</a></p><h2 id="resources">Resources</h2></div></body></html>
+}</code></pre><p>The display option represents the preferred display mode, once it is opened from the home screen. In most cases, standalone will be the best option for a progressive web app.</p><p>TODO: display 'fullscreen', 'browser', 'standalone'. If you configured the web app manifest correctly, the browser might decide to show an <a href="https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/">Install Banner</a>. When and if the install banner is opened is browser-specifc and can be changed over time.</p><h2 id="local_storage">Local Storage</h2><p>The web has many features available that help create an app-like experience, like <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">LocalStorage</a>. We will now keep track of the lastUpdate-date. This date is only updated when we fetch the stations from our server.</p><pre><code>var app = new Vue({
+    el: '#app',
+    data: {
+        lastUpdated: null,
+        stations: []
+    },
+    beforeMount: function () {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(function() {
+                console.log('ServiceWorker registration successful');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+
+        this.loadStations();
+        this.lastUpdated = localStorage.lastUpdated;
+    },
+    methods: {
+        loadStations: function () {
+            var self = this;
+            axios.get('/stations.json')
+                .then(function (response) {
+                    self.stations = response.data;
+                    self.lastUpdated = new Date().toLocaleString();
+                    localStorage.lastUpdated =  self.lastUpdated;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+});</code></pre><p>This will be shown on the <code>index.html</code>-file below the logo:</p><pre><code>&lt;div id=&quot;logo&quot;&gt;
+    &lt;img src=&quot;img/logo.png&quot; alt=&quot;MyBike&quot; /&gt;
+    &lt;p&gt;&lt;small&gt;Last Updated: {{lastUpdated}}&lt;/small&gt;&lt;/p&gt;
+&lt;/div&gt;</code></pre><h2 id="geolocation">Geolocation</h2><p>We can now install our app and make sure that it loads fast and works offline. Next step is to find the closest station. We can use the <a href="https://developers.google.com/maps/documentation/javascript/examples/map-geolocation">Geolocation API</a> and get the current position. Once we retrieve it, we can sort the list based on the closest station.</p><p>I used these <a href="http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula">Stackoverflow Answer</a> to calculate the number of kilometers between my coordinations and the ones described for the station. The distance is set dynamically, so we need to use the <a href="https://vuejs.org/v2/guide/reactivity.html">Vue-set method</a> and we round it to 1 decimal.</p><p>We add the distance to the view:</p><pre><code>&lt;small v-if=&quot;station.distance&quot;&gt;{{station.distance}}km&lt;/small&gt;</code></pre><p>And than we add all functionality to the app.js file to get the current location and sort the stations accordingly.</p><pre><code>var app = new Vue({
+    el: '#app',
+    data: {
+        position: null,
+        lastUpdated: null,
+        stations: []
+    },
+    beforeMount: function () {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(function() {
+                console.log('ServiceWorker registration successful');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(this.locatePosition);
+        }
+
+        this.loadStations();
+        this.lastUpdated = localStorage.lastUpdated;
+    },
+    methods: {
+        deg2rad: function (deg) {
+            return deg * (Math.PI / 180)
+        },
+        getDistanceFromLatLonInKm: function (lat1, lon1, lat2, lon2) {
+            var R = 6371;
+            var dLat = this.deg2rad(lat2 - lat1);
+            var dLon = this.deg2rad(lon2 - lon1);
+            var a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var d = R * c;
+            return d;
+        },
+        loadStations: function () {
+            axios.get('/stations.json')
+                .then(function (response) {
+                    this.stations = response.data;
+                    this.lastUpdated = new Date().toLocaleString();
+                    localStorage.lastUpdated =  this.lastUpdated;
+                }.bind(this))
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        locatePosition: function (position) {
+            this.position = position.coords;
+            this.sort();
+        },
+        sort: function() {
+            for(var i in this.stations) {
+                var distance = this.getDistanceFromLatLonInKm(this.stations[i].lat, this.stations[i].lon, this.position.latitude, this.position.longitude);
+                Vue.set(this.stations[i], 'distance', Math.round(distance * 10) / 10);
+            }
+            this.stations.sort(function(a, b) {
+                return a.distance - b.distance;
+            });
+        }
+    }
+});</code></pre><h2 id="push_notifications">Push Notifications</h2><p>Our final touch are push notifications to engage users to use our app. Push notifications work in 2 parts: <a href="https://notifications.spec.whatwg.org">Web Notifications</a> and the <a href="https://w3c.github.io/push-api">Push API</a></p><h2 id="source_code">Source code</h2><p><a href="https://github.com/optis/mybike">https://github.com/optis/mybike</a></p><h2 id="resources">Resources</h2></div></body></html>

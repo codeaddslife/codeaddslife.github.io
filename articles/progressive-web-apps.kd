@@ -298,6 +298,144 @@ If you configured the web app manifest correctly, the browser might decide to sh
 [Install Banner](https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/). When and if
 the install banner is opened is browser-specifc and can be changed over time.
 
+== Local Storage
+The web has many features available that help create an app-like experience, like 
+[LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). We will now keep 
+track of the lastUpdate-date. This date is only updated when we fetch the stations from our server. 
+
+```
+var app = new Vue({
+    el: '#app',
+    data: {
+        lastUpdated: null,
+        stations: []
+    },
+    beforeMount: function () {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(function() {
+                console.log('ServiceWorker registration successful');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+
+        this.loadStations();
+        this.lastUpdated = localStorage.lastUpdated;
+    },
+    methods: {
+        loadStations: function () {
+            var self = this;
+            axios.get('/stations.json')
+                .then(function (response) {
+                    self.stations = response.data;
+                    self.lastUpdated = new Date().toLocaleString();
+                    localStorage.lastUpdated =  self.lastUpdated;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+});
+```
+
+This will be shown on the `index.html`-file below the logo: 
+
+```
+<div id="logo">
+    <img src="img/logo.png" alt="MyBike" />
+    <p><small>Last Updated: {{lastUpdated}}</small></p>
+</div>
+```
+
+== Geolocation
+We can now install our app and make sure that it loads fast and works offline. Next step is to find the closest station.
+We can use the [Geolocation API](https://developers.google.com/maps/documentation/javascript/examples/map-geolocation) and 
+get the current position. Once we retrieve it, we can sort the list based on the closest station. 
+
+I used these [Stackoverflow Answer](http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula) 
+to calculate the number of kilometers between my coordinations and the ones described for the station.
+The distance is set dynamically, so we need to use the [Vue-set method](https://vuejs.org/v2/guide/reactivity.html) and we round it to 1 decimal.
+
+We add the distance to the view: 
+
+```
+<small v-if="station.distance">{{station.distance}}km</small>
+```
+
+And than we add all functionality to the app.js file to get the current location and sort the stations accordingly.
+
+```
+var app = new Vue({
+    el: '#app',
+    data: {
+        position: null,
+        lastUpdated: null,
+        stations: []
+    },
+    beforeMount: function () {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(function() {
+                console.log('ServiceWorker registration successful');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(this.locatePosition);
+        }
+
+        this.loadStations();
+        this.lastUpdated = localStorage.lastUpdated;
+    },
+    methods: {
+        deg2rad: function (deg) {
+            return deg * (Math.PI / 180)
+        },
+        getDistanceFromLatLonInKm: function (lat1, lon1, lat2, lon2) {
+            var R = 6371;
+            var dLat = this.deg2rad(lat2 - lat1);
+            var dLon = this.deg2rad(lon2 - lon1);
+            var a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var d = R * c;
+            return d;
+        },
+        loadStations: function () {
+            axios.get('/stations.json')
+                .then(function (response) {
+                    this.stations = response.data;
+                    this.lastUpdated = new Date().toLocaleString();
+                    localStorage.lastUpdated =  this.lastUpdated;
+                }.bind(this))
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        locatePosition: function (position) {
+            this.position = position.coords;
+            this.sort();
+        },
+        sort: function() {
+            for(var i in this.stations) {
+                var distance = this.getDistanceFromLatLonInKm(this.stations[i].lat, this.stations[i].lon, this.position.latitude, this.position.longitude);
+                Vue.set(this.stations[i], 'distance', Math.round(distance * 10) / 10);
+            }
+            this.stations.sort(function(a, b) {
+                return a.distance - b.distance;
+            });
+        }
+    }
+});
+```
+
+== Push Notifications
+Our final touch are push notifications to engage users to use our app. Push notifications work in 2 parts: [Web Notifications](https://notifications.spec.whatwg.org) and the [Push API](https://w3c.github.io/push-api)
+
+
 == Source code
 [https://github.com/optis/mybike](https://github.com/optis/mybike)
 
