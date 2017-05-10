@@ -30,7 +30,7 @@ In this article, we will build a progressive web app for my hometown's
 part of their public transport system. In our app, we want to show the availability of bikes per station (And also show the closest
 station, if you wanted to hop onto a bike right away).
 
-TODO: velo-photo
+[image:velo](/img/0002_velo.jpg)
 
 I used [Vue.js](vuejs.org) for this. This application is kept as simple as possible to focus on the PWA-specific parts.
 For a real world Vue.js application, you might want to check out Vue's [CLI tool](https://github.com/vuejs/vue-cli).
@@ -127,7 +127,7 @@ npm start
 
 The app will now render beautifully on the different browsers.
 
-TODO: screenshots
+[image:getting started](/img/0002_getting_started.png)
 
 = Service workers
 [Service workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) are a 
@@ -298,6 +298,8 @@ If you configured the web app manifest correctly, the browser might decide to sh
 [Install Banner](https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/). When and if
 the install banner is opened is browser-specifc and can be changed over time.
 
+[image:install banner](/img/0002_install_banner.png)
+
 == Local Storage
 The web has many features available that help create an app-like experience, like 
 [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). We will now keep 
@@ -433,8 +435,114 @@ var app = new Vue({
 ```
 
 == Push Notifications
-Our final touch are push notifications to engage users to use our app. Push notifications work in 2 parts: [Web Notifications](https://notifications.spec.whatwg.org) and the [Push API](https://w3c.github.io/push-api)
+For our final touch, we implement push notifications to engage users to use our app. Push notifications for progressive web apps work in 2 parts: [Web Notifications](https://notifications.spec.whatwg.org) and the [Push API](https://w3c.github.io/push-api).
+Web notifications look like this: 
 
+[image:Web Notifications](/img/0002_notifications.png)
+
+We can show this, when a push-event is triggered in our service worker:
+
+```
+self.addEventListener('push', function(event) {
+    event.waitUntil(self.registration.showNotification('MyBike', {
+        body: event.data.text(),
+        icon: 'img/icon-192.png'
+    }));
+});
+```
+Service workers can be triggered, even if the user is not using our app at the moment. If the user clicks on the push notification, we want him to go 
+back to the app. 
+
+```
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('https://www.velo-antwerpen.be/en/news')
+    );
+});
+```
+
+Now that we have to notification part right, we should subscribe our user to push notifications from our app. First we change the index.html: 
+
+```
+<div id="logo">
+    <img src="img/logo.png" alt="MyBike" />
+    <p>
+        <small v-if="lastUpdated">Last Updated: {{lastUpdated}} -
+            <a v-if="!subscription" href="javascript:void(0)" v-on:click="subscribe()">Enable notifications</a>
+            <a v-if="subscription" href="javascript:void(0)" v-on:click="unsubscribe()">Disable notifications</a>
+        </small>
+    </p>
+</div>
+
+<div v-if="subscription" class="info">
+    {{subscription}}
+</div>
+```
+
+We now show enable/disable push notifications so the user can toggle his subscription. If we have a subscription we 
+show it on the page, so we can later copy it to test the push notification. As you can see, there are 2 new functions here: subscribe() and unsubscribe(). 
+Let's implement this in our app.js: 
+
+```
+subscribe: function() {
+    const publicKey = "<YOUR_PUBLIC_KEY>"
+    const applicationServerKey = this.urlB64ToUint8Array(publicKey);
+    this.swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey
+    }).then(function(subscription) {
+        console.log('User is subscribed.');
+        this.subscription = subscription;
+    }.bind(this));
+},
+unsubscribe: function() {
+    this.swRegistration.pushManager.getSubscription()
+        .then(function(subscription) {
+            if (subscription) {
+                subscription.unsubscribe();
+                this.subscription = null;
+                console.log('User is unsubscribed.');
+            }
+        }.bind(this))
+},
+urlB64ToUint8Array: function (base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (var i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+```
+In order to send push notifications, we need to have a push notification server. We will use Google's [Push Companion](https://web-push-codelab.appspot.com/) website for this. 
+In the above code, replace "<YOUR_PUBLIC_KEY>" with the public key that is generated for you on the Push Companion website: 
+
+TODO: web companion site
+
+Reload the MyBike-application and press 'Enable notifications'. After a few moments, the text should switch to 'Disable notifications', meaning that we are now described, and you can 
+disabled them again when needed. The subscription itself is shown in blue.
+
+TODO: image
+
+Copy the subscription and paste it in the Push Companion site:
+
+TODO: image
+
+You should now see the same notification message as before, but then triggered by the push notification service. 
+
+== Conclusion
+PWAs are not a replacement for native apps. Native apps will always have better integration with the mobile OS. Where PWAs will help, is anwser the 
+question if it is still relevant to build a native apps that is just a container around already existing web content. This means we both 
+get better quality web apps and better quality native apps. 
+
+You can transform any web application to a progressive web app in a few hours. While they won't work on all platforms yet, they can 
+add value today we're they do work. PWAs, but especially service workers, are an exciting development to make the web better. 
 
 == Source code
 [https://github.com/optis/mybike](https://github.com/optis/mybike)
