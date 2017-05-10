@@ -1,4 +1,4 @@
-<!doctype html><html lang="en_US"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Progressive web apps - codeaddslife</title><link rel="stylesheet" href="/main.css"><link rel="icon" type="image/png" href="/favicon.png"></head><body><div id="hd"><div class="wr"><a href="/"><img src="/logo.png" alt="codeaddslife"></a></div></div><div class="wr"><h1 id="progressive_web_apps">Progressive web apps</h1><p>The term <a href="https://developers.google.com/web/progressive-web-apps/">Progressive web apps</a> was coined in <a href="https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/">june 2015</a> by Alex Russell and Frances Berriman to bridge the gap between web apps and native apps. In this article, we will create a fully functioning progressive web app to show the main concepts in more detail.</p><h2 id="what_are_progressive_web_apps?">What are progressive web apps?</h2><p>Progressive web apps (PWA) are web applications that <em>progress over time</em>. If you happen to visit a website a lot, it can be great to cache some of these assets offline or to install it on the homescreen.</p><p>It is build on the foundation of <a href="https://alistapart.com/article/understandingprogressiveenhancement">progressive enhancement</a> and <a href="https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design">responsive web design</a>. Like any modern website, it should work for anybody anywhere and use more modern browser features when they are available.</p><p>Progressive web apps differ from hybrid apps as they are not installed via an app store (A process where you typically <a href="http://blog.gaborcselle.com/2012/10/every-step-costs-you-20-of-users.html">loose a lot of potential users</a>).</p><p>They are updated on the server, which costs less to maintain since all users are on the same version. PWA's rely heaviliy on service workers to provide a native app-like experience.</p><h2 id="example">Example</h2><p>In this article, we will build a progressive web app for my hometown's <a href="https://www.velo-antwerpen.be/en">bike renting service Velo</a>. A lot of cities have such a renting service nowadays as part of their public transport system. In our app, we want to show the availability of bikes per station (And also show the closest station, if you wanted to hop onto a bike right away).</p><p>TODO: velo-photo</p><p>I used <a href="vuejs.org">Vue.js</a> for this. This application is kept as simple as possible to focus on the PWA-specific parts. For a real world Vue.js application, you might want to check out Vue's <a href="https://github.com/vuejs/vue-cli">CLI tool</a>.</p><h2 id="getting_started">Getting Started</h2><p>First off, we start with a basic web application. The index.html-file will look like this:</p><pre><code>&lt;!DOCTYPE html&gt;
+<!doctype html><html lang="en_US"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Progressive web apps - codeaddslife</title><link rel="stylesheet" href="/main.css"><link rel="icon" type="image/png" href="/favicon.png"></head><body><div id="hd"><div class="wr"><a href="/"><img src="/logo.png" alt="codeaddslife"></a></div></div><div class="wr"><h1 id="progressive_web_apps">Progressive web apps</h1><p>The term <a href="https://developers.google.com/web/progressive-web-apps/">Progressive web apps</a> was coined in <a href="https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/">june 2015</a> by Alex Russell and Frances Berriman to bridge the gap between web apps and native apps. In this article, we will create a fully functioning progressive web app to show the main concepts in more detail.</p><h2 id="what_are_progressive_web_apps?">What are progressive web apps?</h2><p>Progressive web apps (PWA) are web applications that <em>progress over time</em>. If you happen to visit a website a lot, it can be great to cache some of these assets offline or to install it on the homescreen.</p><p>It is build on the foundation of <a href="https://alistapart.com/article/understandingprogressiveenhancement">progressive enhancement</a> and <a href="https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design">responsive web design</a>. Like any modern website, it should work for anybody anywhere and use more modern browser features when they are available.</p><p>Progressive web apps differ from hybrid apps as they are not installed via an app store (A process where you typically <a href="http://blog.gaborcselle.com/2012/10/every-step-costs-you-20-of-users.html">loose a lot of potential users</a>).</p><p>They are updated on the server, which costs less to maintain since all users are on the same version. PWA's rely heaviliy on service workers to provide a native app-like experience.</p><h2 id="example">Example</h2><p>In this article, we will build a progressive web app for my hometown's <a href="https://www.velo-antwerpen.be/en">bike renting service Velo</a>. A lot of cities have such a renting service nowadays as part of their public transport system. In our app, we want to show the availability of bikes per station (And also show the closest station, if you wanted to hop onto a bike right away).</p><p><img src="/img/0002_velo.jpg" alt="velo"></p><p>I used <a href="vuejs.org">Vue.js</a> for this. This application is kept as simple as possible to focus on the PWA-specific parts. For a real world Vue.js application, you might want to check out Vue's <a href="https://github.com/vuejs/vue-cli">CLI tool</a>.</p><h2 id="getting_started">Getting Started</h2><p>First off, we start with a basic web application. The index.html-file will look like this:</p><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
     &lt;head&gt;
         &lt;title&gt;MyBike&lt;/title&gt;
@@ -62,7 +62,7 @@ ul.stations li div.station { margin-bottom: 10px; margin-top: 10px; margin-left:
 ul.stations li div.station:after { content: ''; display: block; clear: both; }
 ul.stations li div.station div.status { border-radius: 50%; float: left; margin-left: -58px; width: 48px; }
 ul.stations li div.station div.status img { width: 48px; }</code></pre><p>To see the example for yourself, type the following commands:</p><pre><code>npm install -g browser-sync
-npm start</code></pre><p>The app will now render beautifully on the different browsers.</p><p>TODO: screenshots</p><h1 id="service_workers">Service workers</h1><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Service workers</a> are a big part of PWAs. They allow you to develop <a href="http://offlinefirst.org/">offline first</a>. A service worker is a javascript process that runs separately and acts as a programmable proxy between your application and the network. To avoid <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man-in-the-middle attacks</a>, service workers have to run over https.</p><p>In order to notify the browser that you have a service worker available, you have to register it on load. We do this in the our <code>app.js</code> file. We also check if serviceWorker is a know feature in our browser, so when it's not, the app will not crash.</p><pre><code>if ('serviceWorker' in navigator) {
+npm start</code></pre><p>The app will now render beautifully on the different browsers.</p><p><img src="/img/0002_getting_started.png" alt="getting started"></p><h1 id="service_workers">Service workers</h1><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Service workers</a> are a big part of PWAs. They allow you to develop <a href="http://offlinefirst.org/">offline first</a>. A service worker is a javascript process that runs separately and acts as a programmable proxy between your application and the network. To avoid <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man-in-the-middle attacks</a>, service workers have to run over https.</p><p>In order to notify the browser that you have a service worker available, you have to register it on load. We do this in the our <code>app.js</code> file. We also check if serviceWorker is a know feature in our browser, so when it's not, the app will not crash.</p><pre><code>if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(function() {
         console.log('ServiceWorker registration successful');
     }).catch(function(err) {
@@ -144,7 +144,7 @@ self.addEventListener('install', function(event) {
     &quot;sizes&quot;: &quot;384x384&quot;,
     &quot;type&quot;: &quot;image/png&quot;
   }]
-}</code></pre><p>The display option represents the preferred display mode, once it is opened from the home screen. In most cases, standalone will be the best option for a progressive web app.</p><p>TODO: display 'fullscreen', 'browser', 'standalone'. If you configured the web app manifest correctly, the browser might decide to show an <a href="https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/">Install Banner</a>. When and if the install banner is opened is browser-specifc and can be changed over time.</p><h2 id="local_storage">Local Storage</h2><p>The web has many features available that help create an app-like experience, like <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">LocalStorage</a>. We will now keep track of the lastUpdate-date. This date is only updated when we fetch the stations from our server.</p><pre><code>var app = new Vue({
+}</code></pre><p>The display option represents the preferred display mode, once it is opened from the home screen. In most cases, standalone will be the best option for a progressive web app.</p><p>TODO: display 'fullscreen', 'browser', 'standalone'. If you configured the web app manifest correctly, the browser might decide to show an <a href="https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/">Install Banner</a>. When and if the install banner is opened is browser-specifc and can be changed over time.</p><p><img src="/img/0002_install_banner.png" alt="install banner"></p><h2 id="local_storage">Local Storage</h2><p>The web has many features available that help create an app-like experience, like <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">LocalStorage</a>. We will now keep track of the lastUpdate-date. This date is only updated when we fetch the stations from our server.</p><pre><code>var app = new Vue({
     el: '#app',
     data: {
         lastUpdated: null,
@@ -242,4 +242,59 @@ self.addEventListener('install', function(event) {
             });
         }
     }
-});</code></pre><h2 id="push_notifications">Push Notifications</h2><p>Our final touch are push notifications to engage users to use our app. Push notifications work in 2 parts: <a href="https://notifications.spec.whatwg.org">Web Notifications</a> and the <a href="https://w3c.github.io/push-api">Push API</a></p><h2 id="source_code">Source code</h2><p><a href="https://github.com/optis/mybike">https://github.com/optis/mybike</a></p><h2 id="resources">Resources</h2></div></body></html>
+});</code></pre><h2 id="push_notifications">Push Notifications</h2><p>For our final touch, we implement push notifications to engage users to use our app. Push notifications for progressive web apps work in 2 parts: <a href="https://notifications.spec.whatwg.org">Web Notifications</a> and the <a href="https://w3c.github.io/push-api">Push API</a>. Web notifications look like this:</p><p><img src="/img/0002_notifications.png" alt="Web Notifications"></p><p>We can show this, when a push-event is triggered in our service worker:</p><pre><code>self.addEventListener('push', function(event) {
+    event.waitUntil(self.registration.showNotification('MyBike', {
+        body: event.data.text(),
+        icon: 'img/icon-192.png'
+    }));
+});</code></pre><p>Service workers can be triggered, even if the user is not using our app at the moment. If the user clicks on the push notification, we want him to go back to the app.</p><pre><code>self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('https://www.velo-antwerpen.be/en/news')
+    );
+});</code></pre><p>Now that we have to notification part right, we should subscribe our user to push notifications from our app. First we change the index.html:</p><pre><code>&lt;div id=&quot;logo&quot;&gt;
+    &lt;img src=&quot;img/logo.png&quot; alt=&quot;MyBike&quot; /&gt;
+    &lt;p&gt;
+        &lt;small v-if=&quot;lastUpdated&quot;&gt;Last Updated: {{lastUpdated}} -
+            &lt;a v-if=&quot;!subscription&quot; href=&quot;javascript:void(0)&quot; v-on:click=&quot;subscribe()&quot;&gt;Enable notifications&lt;/a&gt;
+            &lt;a v-if=&quot;subscription&quot; href=&quot;javascript:void(0)&quot; v-on:click=&quot;unsubscribe()&quot;&gt;Disable notifications&lt;/a&gt;
+        &lt;/small&gt;
+    &lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div v-if=&quot;subscription&quot; class=&quot;info&quot;&gt;
+    {{subscription}}
+&lt;/div&gt;</code></pre><p>We now show enable/disable push notifications so the user can toggle his subscription. If we have a subscription we show it on the page, so we can later copy it to test the push notification. As you can see, there are 2 new functions here: subscribe() and unsubscribe(). Let's implement this in our app.js:</p><pre><code>subscribe: function() {
+    const publicKey = &quot;&lt;YOUR_PUBLIC_KEY&gt;&quot;
+    const applicationServerKey = this.urlB64ToUint8Array(publicKey);
+    this.swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey
+    }).then(function(subscription) {
+        console.log('User is subscribed.');
+        this.subscription = subscription;
+    }.bind(this));
+},
+unsubscribe: function() {
+    this.swRegistration.pushManager.getSubscription()
+        .then(function(subscription) {
+            if (subscription) {
+                subscription.unsubscribe();
+                this.subscription = null;
+                console.log('User is unsubscribed.');
+            }
+        }.bind(this))
+},
+urlB64ToUint8Array: function (base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (var i = 0; i &lt; rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}</code></pre><p>In order to send push notifications, we need to have a push notification server. We will use Google's <a href="https://web-push-codelab.appspot.com/">Push Companion</a> website for this. In the above code, replace &quot;&lt;YOUR<em>PUBLIC</em>KEY&gt;&quot; with the public key that is generated for you on the Push Companion website:</p><p>TODO: web companion site</p><p>Reload the MyBike-application and press 'Enable notifications'. After a few moments, the text should switch to 'Disable notifications', meaning that we are now described, and you can disabled them again when needed. The subscription itself is shown in blue.</p><p>TODO: image</p><p>Copy the subscription and paste it in the Push Companion site:</p><p>TODO: image</p><p>You should now see the same notification message as before, but then triggered by the push notification service.</p><h2 id="conclusion">Conclusion</h2><p>PWAs are not a replacement for native apps. Native apps will always have better integration with the mobile OS. Where PWAs will help, is anwser the question if it is still relevant to build a native apps that is just a container around already existing web content. This means we both get better quality web apps and better quality native apps.</p><p>You can transform any web application to a progressive web app in a few hours. While they won't work on all platforms yet, they can add value today we're they do work. PWAs, but especially service workers, are an exciting development to make the web better.</p><h2 id="source_code">Source code</h2><p><a href="https://github.com/optis/mybike">https://github.com/optis/mybike</a></p><h2 id="resources">Resources</h2></div></body></html>
