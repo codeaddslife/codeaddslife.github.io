@@ -76,7 +76,7 @@ First off, we start with a basic web application. The index.html-file will look 
 ```
 
 As you can see we load vue.js here, which will load a view for us based on the data that is coming back from
-our http request. To keep it simple, this data is a local JSON file.
+our http request. To keep things simple, this data is a local JSON file.
 
 ```
 var app = new Vue({
@@ -116,6 +116,7 @@ ul.stations li div.station { margin-bottom: 10px; margin-top: 10px; margin-left:
 ul.stations li div.station:after { content: ''; display: block; clear: both; }
 ul.stations li div.station div.status { border-radius: 50%; float: left; margin-left: -58px; width: 48px; }
 ul.stations li div.station div.status img { width: 48px; }
+div.info {background-color: #d9edf7; color: #31708f; border-radius: 16px; word-wrap: break-word; padding: 20px; margin-bottom: 20px;}
 ```
 
 To see the example for yourself, type the following commands:

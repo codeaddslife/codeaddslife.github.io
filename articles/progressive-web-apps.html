@@ -31,7 +31,7 @@
         &lt;script src=&quot;js/vue.min.js&quot;&gt;&lt;/script&gt;
         &lt;script src=&quot;js/app.js&quot;&gt;&lt;/script&gt;
     &lt;/body&gt;
-&lt;/html&gt;</code></pre><p>As you can see we load vue.js here, which will load a view for us based on the data that is coming back from our http request. To keep it simple, this data is a local JSON file.</p><pre><code>var app = new Vue({
+&lt;/html&gt;</code></pre><p>As you can see we load vue.js here, which will load a view for us based on the data that is coming back from our http request. To keep things simple, this data is a local JSON file.</p><pre><code>var app = new Vue({
     el: '#app',
     data: {
         stations: []
@@ -61,7 +61,8 @@ ul.stations li { border-bottom: 1px solid #e4e6e8; }
 ul.stations li div.station { margin-bottom: 10px; margin-top: 10px; margin-left: 58px; }
 ul.stations li div.station:after { content: ''; display: block; clear: both; }
 ul.stations li div.station div.status { border-radius: 50%; float: left; margin-left: -58px; width: 48px; }
-ul.stations li div.station div.status img { width: 48px; }</code></pre><p>To see the example for yourself, type the following commands:</p><pre><code>npm install -g browser-sync
+ul.stations li div.station div.status img { width: 48px; }
+div.info {background-color: #d9edf7; color: #31708f; border-radius: 16px; word-wrap: break-word; padding: 20px; margin-bottom: 20px;}</code></pre><p>To see the example for yourself, type the following commands:</p><pre><code>npm install -g browser-sync
 npm start</code></pre><p>The app will now render beautifully on the different browsers.</p><p><img src="/img/0002_getting_started.png" alt="getting started"></p><h1 id="service_workers">Service workers</h1><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Service workers</a> are a big part of PWAs. They allow you to develop <a href="http://offlinefirst.org/">offline first</a>. A service worker is a javascript process that runs separately and acts as a programmable proxy between your application and the network. To avoid <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man-in-the-middle attacks</a>, service workers have to run over https.</p><p>In order to notify the browser that you have a service worker available, you have to register it on load. We do this in the our <code>app.js</code> file. We also check if serviceWorker is a know feature in our browser, so when it's not, the app will not crash.</p><pre><code>if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(function() {
         console.log('ServiceWorker registration successful');
