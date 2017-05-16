@@ -355,7 +355,7 @@ We can now install our app and make sure that it loads fast and works offline. N
 We can use the [Geolocation API](https://developers.google.com/maps/documentation/javascript/examples/map-geolocation) and 
 get the current position. Once we retrieve it, we can sort the list based on the closest station. 
 
-I used these [Stackoverflow Answer](http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula) 
+I used this [Stackoverflow Answer](http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula) 
 to calculate the number of kilometers between my coordinations and the ones described for the station.
 The distance is set dynamically, so we need to use the [Vue-set method](https://vuejs.org/v2/guide/reactivity.html) and we round it to 1 decimal.
 
@@ -365,7 +365,7 @@ We add the distance to the view:
 <small v-if="station.distance">{{station.distance}}km</small>
 ```
 
-And than we add all functionality to the app.js file to get the current location and sort the stations accordingly.
+And then we add all functionality to the app.js file to get the current location and sort the stations accordingly.
 
 ```
 var app = new Vue({
@@ -521,12 +521,12 @@ urlB64ToUint8Array: function (base64String) {
 }
 ```
 In order to send push notifications, we need to have a push notification server. We will use Google's [Push Companion](https://web-push-codelab.appspot.com/) website for this. 
-In the above code, replace "<YOUR_PUBLIC_KEY>" with the public key that is generated for you on the Push Companion website: 
+In the above code, replace "<YOUR\_PUBLIC\_KEY>" with the public key that is generated for you on the Push Companion website: 
 
 [image:web companion site](/img/0002_web_companion_site.png)
 
-Reload the MyBike-application and press 'Enable notifications'. After a few moments, the text should switch to 'Disable notifications', meaning that we are now described, and you can 
-disabled them again when needed. The subscription itself is shown in blue.
+Reload the MyBike-application and press 'Enable notifications'. After a few moments, the text should switch to 'Disable notifications', meaning that we are now subscribed, and you can 
+disable them again when needed. The subscription itself is shown in blue.
 
 [image:subscription info](/img/0002_push_subscription_info.png)
 
