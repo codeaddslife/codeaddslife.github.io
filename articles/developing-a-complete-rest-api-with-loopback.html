@@ -197,7 +197,7 @@ Enter an empty property name when done.
     &quot;dataSource&quot;: &quot;reservationDS&quot;,
     &quot;public&quot;: false
   }
-}</code></pre><p>We will now add 3 users to application:</p><ul><li>Andy, our administrator : (username: andy, password: andy)</li><li>Kenneth, a customer : (username: kenneth, password: kenneth)</li><li>Claudiu, another customer: (username: claudiu, password: claudiu)</li></ul><p>The passwords need to be hashed in the db.json file. We also link our reservations to our customers.</p><pre><code>{
+}</code></pre><p>We will now add 3 users to application:</p><ul><li>Andy, our administrator : (username: andy, password: andy)</li><li>Kenneth, a customer : (username: kenneth, password: kenneth)</li><li>Claudiu, another customer: (username: claudiu, password: claudiu)</li></ul><p>The passwords need to be hashed in the db.json file. We also link our reservations to our customers, by adding customerId to the reservation table.</p><pre><code>{
   &quot;ids&quot;: {
     &quot;campground&quot;: 5,
     &quot;reservation&quot;: 3,

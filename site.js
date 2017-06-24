@@ -18,14 +18,6 @@ globby.sync('**/*.kd').forEach(function (kd) {
 
     var result = new koara.Parser().parse(fileMatter.content)
     var renderer = new koaraHtml.Html5Renderer();
-    /*renderer.visitCodeBlock = function(node) {
-        renderer.out += highlight(node.value, node.language, 'html');
-
-
-
-    }*/
-
-
     renderer.headingIds = true;
     result.accept(renderer);
 
