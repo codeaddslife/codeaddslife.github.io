@@ -897,5 +897,7 @@ You can do all of this inside the mLab web interface. E.g:
 
 When you created the document and go to http://localhost:3000/api/campgrounds and you should see the newly created.
 
-== Source code
-[https://github.com/optis/loopback-rest-api](https://github.com/optis/loopback-rest-api)
+== Info
+- Published: Mar 24, 2017
+- Last updated: Nov 14, 2017
+- Source code: [https://github.com/optis/loopback-rest-api](https://github.com/optis/loopback-rest-api)
