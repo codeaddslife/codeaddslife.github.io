@@ -9,7 +9,7 @@ title: Developing a complete REST API with Loopback
 
 Here we will use version 3.4.0 to build an API for camping reservations:
 
-[image:DataModel](/img/0001_datamodel.png)
+[image:DataModel](/img/loopback_datamodel.png)
 
 == Getting Started
 Loopback comes with a [CLI tool](https://loopback.io/doc/en/lb3/Command-line-tools.html) to generate an application.
@@ -123,7 +123,7 @@ The id property is automatically included, so you don’t have to add it.
 Visit the API explorer at http://localhost:3000/explorer. You'll see a lot of endpoints available for our
 campgrounds now.
 
-[image:API Explorer](/img/0001_explorer.png)
+[image:API Explorer](/img/loopback_explorer.png)
 
 Let's test our API by getting all the campgrounds:
 
@@ -502,12 +502,12 @@ When I go to http://localhost:3000/api/reservations, I get a 401 Authorization R
 We will now log in as Kenneth to see his reservations. Go to http://localhost:3000/explorer/#!/customer/customer_login
 and log in:
 
-[image:Login](/img/0001_login.png)
+[image:Login](/img/loopback_login.png)
 
 The id of the response is a generated access token. You can now copy it and set it in the header to provide the access
 token for all calls in the API Explorer.
 
-[image:Login](/img/0001_token.png)
+[image:Login](/img/loopback_token.png)
 
 Or you can add the access token as a request parameter. Let's try this out.
 
@@ -815,7 +815,7 @@ describe('Campgrounds', function() {
 
 Run the command `mocha` now and you should see all tests passing:
 
-[image:testing](/img/0001_testing.png)
+[image:testing](/img/loopback_testing.png)
 
 Ok, we're almost done now. Last stop: Deploy to Production.
 
@@ -845,7 +845,7 @@ I will use an [MLab](https://mlab.com)-hosted MongoDB. You can sign up and creat
 - The username credentials you used to signup for MLab are not used to connect in your application, make sure you
  create a database user here:
 
- [image:MLab](/img/0001_mlab.png)
+ [image:MLab](/img/loopback_mlab.png)
 
 
 Create a new file called server/datasources.prod.json and add your mongodb settings:
