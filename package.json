@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "npm run build:kd && npm run build:css",
+    "build": "npm run build:kd",
     "build:kd": "node site.js",
-    "build:css": "node-sass --output-style compressed main.scss > main.css",
     "serve": "browser-sync start --no-notify --port 8000 -s . -f .",
-    "start": "npm run build && parallelshell 'npm run serve' 'npm run watch:css' 'npm run watch:kd'",
-    "watch:css": "onchange 'main.scss' -- npm run build:css",
+    "start": "npm run build && parallelshell 'npm run serve' 'npm run watch:kd'",
     "watch:kd": "onchange '**/*.kd' -- npm run build:kd"
   },
   "devDependencies": {
@@ -22,7 +20,9 @@
     "mkdirp": "^0.5.1",
     "node-sass": "^4.5.2",
     "onchange": "^3.2.1",
-    "parallelshell": "^2.0.0",
     "pygments": "^0.2.1"
+  },
+  "dependencies": {
+    "parallelshell": "^3.0.2"
   }
 }
