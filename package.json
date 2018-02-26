@@ -1,6 +1,6 @@
 {
   "name": "codeaddslife.github.io",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "scripts": {
     "build": "npm run build:kd",
@@ -23,6 +23,7 @@
     "pygments": "^0.2.1"
   },
   "dependencies": {
-    "parallelshell": "^3.0.2"
+    "parallelshell": "^3.0.2",
+    "url-exists": "^1.0.3"
   }
 }

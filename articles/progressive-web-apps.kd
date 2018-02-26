@@ -534,7 +534,7 @@ Copy the subscription and paste it in the Push Companion site:
 
 [image:send push message](/img/pwa_send_push_message.png)
 
-You should now see the same notification message as before, but then triggered by the push notification service. 
+You should now see the same notification message as before, but then triggered by the push notification service.
 
 == Conclusion
 PWAs are not a replacement for native apps. Native apps will always have better integration with the mobile OS. Where PWAs will help, is anwser the 
