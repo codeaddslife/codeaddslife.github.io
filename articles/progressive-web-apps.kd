@@ -131,16 +131,16 @@ The app will now render beautifully on the different browsers.
 [image:getting started](/img/pwa_getting_started.png)
 
 = Service workers
-[Service workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) are a 
+[Service workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) are a
 big part of PWAs. They allow you to develop [offline first](http://offlinefirst.org/).
 A service worker is a javascript process that runs separately and acts as a programmable proxy
-between your application and the network. To avoid 
-[man-in-the-middle attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), service workers 
+between your application and the network. To avoid
+[man-in-the-middle attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), service workers
 have to run over https.
 
 
-In order to notify the browser that you have a service worker available, you have to register it on load. 
-We do this in the our `app.js` file. We also check if serviceWorker is a know feature in our browser, so when it's not, 
+In order to notify the browser that you have a service worker available, you have to register it on load.
+We do this in the our `app.js` file. We also check if serviceWorker is a know feature in our browser, so when it's not,
 the app will not crash.
 
 ```
@@ -153,9 +153,9 @@ if ('serviceWorker' in navigator) {
 }
 ```
 
-If you look at the code, you see that we register a seperate javascript file here. This is necassary as the service worker will run 
-seperate from your other javascript code. The service worker also has no access to your DOM. `sw.js` should be created at the root-level, so 
-not inside the js-folder. 
+If you look at the code, you see that we register a seperate javascript file here. This is necassary as the service worker will run
+seperate from your other javascript code. The service worker also has no access to your DOM. `sw.js` should be created at the root-level, so
+not inside the js-folder.
 
 Let's create `sw.js`:
 
@@ -191,15 +191,15 @@ self.addEventListener('install', function(event) {
 ```
 
 What happens here? A service worker has a specific [lifecycle](https://developers.google.com/web/fundamentals/instant-and-offline/service-worker/lifecycle)
-When a service worker is found, the browser will try to install it. `CACHED_URLS` contains all url's that need to be cached. This idea 
-follows the [app shell architecture](https://developers.google.com/web/fundamentals/architecture/app-shell), where you cache all static assets, to startup the 
-application very quickly. In our case, these are all used files, without the station.json file, as this is the dynamic data here. 
+When a service worker is found, the browser will try to install it. `CACHED_URLS` contains all url's that need to be cached. This idea
+follows the [app shell architecture](https://developers.google.com/web/fundamentals/architecture/app-shell), where you cache all static assets, to startup the
+application very quickly. In our case, these are all used files, without the station.json file, as this is the dynamic data here.
 
 If you try to cache a file that cannot be retrieved, the service worker won't be installed
 
 [image:Service Worker failed to install](/img/pwa_error_sw.png)
 
-Once the ServiceWorker is installed, we can listen to the activate-event. 
+Once the ServiceWorker is installed, we can listen to the activate-event.
 
 ```javascript
 self.addEventListener('activate', function(event) {
@@ -215,12 +215,12 @@ self.addEventListener('activate', function(event) {
 });
 ```
 
-There is a difference between a ServiceWorker being installed and the ServiceWorker becoming activated. 
-In our code, we want to listen to activate-events, because when a new version of the ServiceWorker becomes active, we want 
-to delete our old cache. This is also why `CACHE_NAME` has a version (v1) in it's name. A new version will become v2. 
+There is a difference between a ServiceWorker being installed and the ServiceWorker becoming activated.
+In our code, we want to listen to activate-events, because when a new version of the ServiceWorker becomes active, we want
+to delete our old cache. This is also why `CACHE_NAME` has a version (v1) in it's name. A new version will become v2.
 
 The last part are fetch 'events'. When the service worker is installed, every request will trigger a fetch event. Inside this event, we can now
-return our cached resource, if we have one available. 
+return our cached resource, if we have one available.
 
 Keep in mind that cached resource are only returned the second time
 you visit the application, as the first time you were still installing it. Also keep in mind that when you develop,
@@ -301,9 +301,9 @@ the install banner is opened is browser-specifc and can be changed over time.
 [image:install banner](/img/pwa_install_banner.png)
 
 == Local Storage
-The web has many features available that help create an app-like experience, like 
-[LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). We will now keep 
-track of the lastUpdate-date. This date is only updated when we fetch the stations from our server. 
+The web has many features available that help create an app-like experience, like
+[LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). We will now keep
+track of the lastUpdate-date. This date is only updated when we fetch the stations from our server.
 
 ```
 var app = new Vue({
@@ -341,7 +341,7 @@ var app = new Vue({
 });
 ```
 
-This will be shown on the `index.html`-file below the logo: 
+This will be shown on the `index.html`-file below the logo:
 
 ```
 <div id="logo">
@@ -352,14 +352,14 @@ This will be shown on the `index.html`-file below the logo:
 
 == Geolocation
 We can now install our app and make sure that it loads fast and works offline. Next step is to find the closest station.
-We can use the [Geolocation API](https://developers.google.com/maps/documentation/javascript/examples/map-geolocation) and 
-get the current position. Once we retrieve it, we can sort the list based on the closest station. 
+We can use the [Geolocation API](https://developers.google.com/maps/documentation/javascript/examples/map-geolocation) and
+get the current position. Once we retrieve it, we can sort the list based on the closest station.
 
-I used this [Stackoverflow Answer](http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula) 
+I used this [Stackoverflow Answer](http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula)
 to calculate the number of kilometers between my coordinations and the ones described for the station.
 The distance is set dynamically, so we need to use the [Vue-set method](https://vuejs.org/v2/guide/reactivity.html) and we round it to 1 decimal.
 
-We add the distance to the view: 
+We add the distance to the view:
 
 ```
 <small v-if="station.distance">{{station.distance}}km</small>
@@ -436,7 +436,7 @@ var app = new Vue({
 
 == Push Notifications
 For our final touch, we implement push notifications to engage users to use our app. Push notifications for progressive web apps work in 2 parts: [Web Notifications](https://notifications.spec.whatwg.org) and the [Push API](https://w3c.github.io/push-api).
-Web notifications look like this: 
+Web notifications look like this:
 
 [image:Web Notifications](/img/pwa_notifications.png)
 
@@ -450,8 +450,8 @@ self.addEventListener('push', function(event) {
     }));
 });
 ```
-Service workers can be triggered, even if the user is not using our app at the moment. If the user clicks on the push notification, we want him to go 
-back to the app. 
+Service workers can be triggered, even if the user is not using our app at the moment. If the user clicks on the push notification, we want him to go
+back to the app.
 
 ```
 self.addEventListener('notificationclick', function(event) {
@@ -462,7 +462,7 @@ self.addEventListener('notificationclick', function(event) {
 });
 ```
 
-Now that we have to notification part right, we should subscribe our user to push notifications from our app. First we change the index.html: 
+Now that we have to notification part right, we should subscribe our user to push notifications from our app. First we change the index.html:
 
 ```
 <div id="logo">
@@ -480,9 +480,9 @@ Now that we have to notification part right, we should subscribe our user to pus
 </div>
 ```
 
-We now show enable/disable push notifications so the user can toggle his subscription. If we have a subscription we 
-show it on the page, so we can later copy it to test the push notification. As you can see, there are 2 new functions here: subscribe() and unsubscribe(). 
-Let's implement this in our app.js: 
+We now show enable/disable push notifications so the user can toggle his subscription. If we have a subscription we
+show it on the page, so we can later copy it to test the push notification. As you can see, there are 2 new functions here: subscribe() and unsubscribe().
+Let's implement this in our app.js:
 
 ```
 subscribe: function() {
@@ -520,12 +520,12 @@ urlB64ToUint8Array: function (base64String) {
     return outputArray;
 }
 ```
-In order to send push notifications, we need to have a push notification server. We will use Google's [Push Companion](https://web-push-codelab.appspot.com/) website for this. 
-In the above code, replace "<YOUR\_PUBLIC\_KEY>" with the public key that is generated for you on the Push Companion website: 
+In order to send push notifications, we need to have a push notification server. We will use Google's [Push Companion](https://web-push-codelab.appspot.com/) website for this.
+In the above code, replace "<YOUR\_PUBLIC\_KEY>" with the public key that is generated for you on the Push Companion website:
 
 [image:web companion site](/img/pwa_web_companion_site.png)
 
-Reload the MyBike-application and press 'Enable notifications'. After a few moments, the text should switch to 'Disable notifications', meaning that we are now subscribed, and you can 
+Reload the MyBike-application and press 'Enable notifications'. After a few moments, the text should switch to 'Disable notifications', meaning that we are now subscribed, and you can
 disable them again when needed. The subscription itself is shown in blue.
 
 [image:subscription info](/img/pwa_push_subscription_info.png)
@@ -537,15 +537,14 @@ Copy the subscription and paste it in the Push Companion site:
 You should now see the same notification message as before, but then triggered by the push notification service.
 
 == Conclusion
-PWAs are not a replacement for native apps. Native apps will always have better integration with the mobile OS. Where PWAs will help, is anwser the 
-question if it is still relevant to build a native apps that is just a container around already existing web content. This means we both 
-get better quality web apps and better quality native apps. 
+PWAs are not a replacement for native apps. Native apps will always have better integration with the mobile OS. Where PWAs will help, is anwser the
+question if it is still relevant to build a native apps that is just a container around already existing web content. This means we both
+get better quality web apps and better quality native apps.
 
-You can transform any web application to a progressive web app in a few hours. While they won't work on all platforms yet, they can 
-add value today we're they do work. PWAs, but especially service workers, are an exciting development to make the web better. 
+You can transform any web application to a progressive web app in a few hours. While they won't work on all platforms yet, they can
+add value today we're they do work. PWAs, but especially service workers, are an exciting development to make the web better.
 
 == Info
 - Published: May 15, 2017
 - Last updated: Nov 14, 2017
 - Source code: [https://github.com/codeaddslife/demo-pwa](https://github.com/codeaddslife/demo-pwa)
-
