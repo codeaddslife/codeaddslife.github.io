@@ -1,5 +1,7 @@
 ---
 title: Progressive web apps
+datePublished: 2017-05-15
+dateUpdated: 2017-11-14
 ---
 
 = Progressive web apps
@@ -544,7 +546,5 @@ get better quality web apps and better quality native apps.
 You can transform any web application to a progressive web app in a few hours. While they won't work on all platforms yet, they can
 add value today where they do work. PWAs, but especially service workers, are an exciting development to make the web better.
 
-== Info
-- Published: May 15, 2017
-- Last updated: Nov 14, 2017
-- Source code: [https://github.com/codeaddslife/demo-pwa](https://github.com/codeaddslife/demo-pwa)
+== Source code
+[https://github.com/codeaddslife/demo-pwa](https://github.com/codeaddslife/demo-pwa)

@@ -825,13 +825,9 @@ MongoDB:&lt;/p&gt;
 
 &lt;p&gt;When you created the document and go to http://localhost:3000/api/campgrounds and you should see the newly created.&lt;/p&gt;
 
-&lt;h2 id&#x3D;&quot;info&quot;&gt;Info&lt;/h2&gt;
+&lt;h2 id&#x3D;&quot;source_code&quot;&gt;Source code&lt;/h2&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;Published: Mar 24, 2017&lt;/li&gt;
-  &lt;li&gt;Last updated: Nov 14, 2017&lt;/li&gt;
-  &lt;li&gt;Source code: &lt;a href&#x3D;&quot;https://github.com/codeaddslife/loopback&quot;&gt;https://github.com/codeaddslife/loopback&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description>
+&lt;p&gt;&lt;a href&#x3D;&quot;https://github.com/codeaddslife/loopback&quot;&gt;https://github.com/codeaddslife/loopback&lt;/a&gt;&lt;/p&gt;</description>
         </item>
         <item>
             <title>Progressive web apps</title>
@@ -1350,13 +1346,9 @@ get better quality web apps and better quality native apps.&lt;/p&gt;
 &lt;p&gt;You can transform any web application to a progressive web app in a few hours. While they won&#x27;t work on all platforms yet, they can
 add value today where they do work. PWAs, but especially service workers, are an exciting development to make the web better.&lt;/p&gt;
 
-&lt;h2 id&#x3D;&quot;info&quot;&gt;Info&lt;/h2&gt;
+&lt;h2 id&#x3D;&quot;source_code&quot;&gt;Source code&lt;/h2&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;Published: May 15, 2017&lt;/li&gt;
-  &lt;li&gt;Last updated: Nov 14, 2017&lt;/li&gt;
-  &lt;li&gt;Source code: &lt;a href&#x3D;&quot;https://github.com/codeaddslife/demo-pwa&quot;&gt;https://github.com/codeaddslife/demo-pwa&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description>
+&lt;p&gt;&lt;a href&#x3D;&quot;https://github.com/codeaddslife/demo-pwa&quot;&gt;https://github.com/codeaddslife/demo-pwa&lt;/a&gt;&lt;/p&gt;</description>
         </item>
     </channel>
 </rss>
