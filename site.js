@@ -12,6 +12,7 @@ var layout = fs.readFileSync('layout.hbs').toString();
 var template = Handlebars.compile(layout);
 var minify = require('html-minifier').minify;
 var urlExists = require('url-exists');
+var feedItems = [];
 
 globby.sync('**/*.kd').forEach(function (kd) {
     var fileMatter = matter.read(kd, matterOptions);
@@ -20,22 +21,19 @@ globby.sync('**/*.kd').forEach(function (kd) {
     var result = new koara.Parser().parse(fileMatter.content)
     var renderer = new koaraHtml.Html5Renderer();
     renderer.headingIds = true;
-
-    /*renderer.visitLink = function (node) {
-        urlExists('https://www.google.com', function(err, exists) {
-            console.log("Check " + node.value + "... " + (exists ? "OK!" : "NOK!"));
-            if(!exists) {
-                process.exit(1);
-            }
-        });
-        this.out += "<a href=\"" + this.escapeUrl(node.value.toString()) + "\">";
-        node.childrenAccept(this);
-        this.out += "</a>";
-    }*/
     result.accept(renderer);
 
     var html = template({"title": title, "body": renderer.getOutput()});
     var htmlMin = minify(html, {collapseWhitespace: true, removeComments: true});
     mkdirp.sync(path.dirname(kd));
-    fs.writeFileSync(kd.toString().substring(0, kd.toString().length - 3) + ".html", htmlMin);
+
+    var fileName = kd.toString().substring(0, kd.toString().length - 3) + ".html";
+    fs.writeFileSync(fileName, htmlMin);
+    if(path.dirname(kd) === 'articles') {
+        feedItems.push({title: fileMatter.data.title, link: 'https://www.codeaddslife.com/' + fileName, description: renderer.getOutput()})
+    }
 });
+
+// create rssFeeds
+var feedTemplate =  Handlebars.compile(fs.readFileSync('templates/feed.hbs').toString());
+fs.writeFileSync('feed.xml', feedTemplate({feedItems: feedItems}));

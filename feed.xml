@@ -1,0 +1,1362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <title>codeaddslife</title>
+        <link>https://www.codeaddslife.com</link>
+        <item>
+            <title>Loopback</title>
+            <link>https://www.codeaddslife.com/articles/loopback.html</link>
+            <description>&lt;h1 id&#x3D;&quot;loopback&quot;&gt;Loopback&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href&#x3D;&quot;http://loopback.io&quot;&gt;Loopback&lt;/a&gt; was created as an open source mobile backend-as-a-service framework by
+&lt;a href&#x3D;&quot;http://strongloop.com&quot;&gt;Strongloop&lt;/a&gt;. It allows you to setup a REST API in minutes and is based on
+&lt;a href&#x3D;&quot;http://expressjs.com&quot;&gt;Express&lt;/a&gt;. &lt;/p&gt;
+
+&lt;p&gt;Here we will use version 3.4.0 to build an API for camping reservations:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/loopback_datamodel.png&quot; alt&#x3D;&quot;DataModel&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;getting_started&quot;&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;Loopback comes with a &lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Command-line-tools.html&quot;&gt;CLI tool&lt;/a&gt; to generate an application.
+You can configure everything manually, but the CLI tool is just a really handy gift to get you started. Install it via
+the node package manager: &lt;code&gt;npm install -g loopback-cli&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;When installed, type &lt;code&gt;lb&lt;/code&gt; to start the &lt;a href&#x3D;&quot;http://yeoman.io&quot;&gt;yeoman-generator&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     _-----_
+    |       |    ╭──────────────────────────╮
+    |--(o)--|    │  Let&#x27;s create a LoopBack │
+   &#x60;---------´   │       application!       │
+    ( _´U&#x60;_ )    ╰──────────────────────────╯
+    /___A___\   /
+     |  ~  |
+   __&#x27;.___.&#x27;__
+ ´   &#x60;  |° ´ Y &#x60;
+
+? What&#x27;s the name of your application? reservations
+? Enter name of the directory to contain the project: reservations
+   create reservations/
+     info change the working directory to reservations
+
+? Which version of LoopBack would you like to use? 3.x (current)
+? What kind of application do you have in mind? empty-server (An empty LoopBack API, without any configured models or datasources)&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When finished, you will see the following project structure. The JSON files are for configuration and the Javascript
+files are for extending Express.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;reservations/
+├── client                       # Client JS, HTML and CSS files
+│ └── README.md                  # Empty README.md file
+├── package.json                 # Npm package specification
+└── server                       # Node scripts and config
+ ├── boot                        # Initialization scripts
+ │ └── root.js                   # Specify the contextroot
+ ├── component-config.json       # Loopback components config
+ ├── config.json                 # Global settings
+ ├── datasources.json            # Datasource config
+ ├── middleware.development.json # Middleware config for dev
+ ├── middleware.json             # Middleware config
+ ├── model-config.json           # Binds models to datasources
+ └── server.js                   # Main application script&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Go to the reservations folder and start the application by running npm start. Open http://localhost:3000/explorer in
+your browser to see a basic &lt;a href&#x3D;&quot;http://swagger.io/swagger-ui/&quot;&gt;Swagger-UI&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;persistence&quot;&gt;Persistence&lt;/h2&gt;
+
+&lt;p&gt;Look at server/datasources.json. We have no datasources configured yet. We will use an in-memory database here,
+but there are many &lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Database-connectors.html&quot;&gt;database connectors available&lt;/a&gt; out-of-the-box.&lt;/p&gt;
+
+&lt;p&gt;Type &lt;code&gt;lb datasource&lt;/code&gt; to start the generator again.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Enter the data-source name: reservationDS
+? Select the connector for reservationDS: In-memory db (supported by StrongLoop)
+Connector-specific configuration:
+? window.localStorage key to use for persistence (browser only):
+? Full path to file for persistence (server only): db.json&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The db.json file will persist the in-memory data to a file. This allows us to keep our data when we restart the server.
+It also allows us to start our application with some test data.&lt;/p&gt;
+
+&lt;p&gt;We will create this file later on. Loopback won&#x27;t give any warning when this file is not available yet.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;models&quot;&gt;Models&lt;/h2&gt;
+
+&lt;p&gt;Loopback is designed around the concept of &lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Defining-models.html&quot;&gt;models&lt;/a&gt;. Let&#x27;s create a model for our campground, &lt;code&gt;lb model&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Enter the model name: campground
+? Select the data-source to attach campground to: reservationDS (memory)
+? Select model&#x27;s base class PersistedModel
+? Expose campground via the REST API? Yes
+? Custom plural form (used to build REST URL):
+? Common model or server only? server
+Let&#x27;s add some campground properties now.
+
+Enter an empty property name when done.
+? Property name: name
+   invoke   loopback:property
+? Property type: string
+? Required? Yes
+? Default value[leave blank for none]:
+
+Let&#x27;s add another campground property.
+Enter an empty property name when done.
+? Property name: location
+   invoke   loopback:property
+? Property type: geopoint
+? Required? No
+? Default value[leave blank for none]:
+
+Let&#x27;s add another campground property.
+Enter an empty property name when done.
+? Property name:&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We created the campground model and derived it from the PersistedModel, so we can save it to our
+datasource. You can make a model common, which means that the same model can be shared between the client and the
+server, but we decided to use it for the server only.&lt;/p&gt;
+
+&lt;p&gt;Our model has 2 properties, a name and a location.
+The id property is automatically included, so you don’t have to add it.&lt;/p&gt;
+
+&lt;p&gt;Visit the API explorer at http://localhost:3000/explorer. You&#x27;ll see a lot of endpoints available for our
+campgrounds now.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/loopback_explorer.png&quot; alt&#x3D;&quot;API Explorer&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Let&#x27;s test our API by getting all the campgrounds:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;curl -X GET &#x27;http://localhost:3000/api/campgrounds&#x27;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since we don&#x27;t have any data, the response will be an empty list. We now create the db.json file that we specified in
+the previous section. Create a db.json file at the root of the project.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;ids&amp;quot;: {
+    &amp;quot;campground&amp;quot;: 5
+  },
+  &amp;quot;models&amp;quot;: {
+     &amp;quot;campground&amp;quot;: {
+       &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Salt Lake City KOA\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 40.772112, \&amp;quot;lng\&amp;quot;: -111.932165},\&amp;quot;id\&amp;quot;:1}&amp;quot;,
+       &amp;quot;2&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Gouldings Campground\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 37.006989, \&amp;quot;lng\&amp;quot;: -110.214907},\&amp;quot;id\&amp;quot;:2}&amp;quot;,
+       &amp;quot;3&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Grand Canyon Mather Campground\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 36.056472, \&amp;quot;lng\&amp;quot;: -112.140728},\&amp;quot;id\&amp;quot;:3}&amp;quot;,
+       &amp;quot;4&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Camping Paris Bois de Boulogne\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 48.868879, \&amp;quot;lng\&amp;quot;: 2.234914},\&amp;quot;id\&amp;quot;:4}&amp;quot;
+     }
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Restart the server and try again. You should now see 4 campgrounds.
+We will finish this part by generating our reservation model, lb model:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Enter the model name: reservation
+? Select the data-source to attach reservation to: reservationDS (memory)
+? Select model&#x27;s base class PersistedModel
+? Expose reservation via the REST API? Yes
+? Custom plural form (used to build REST URL):
+? Common model or server only? server
+Let&#x27;s add some reservation properties now.
+
+Enter an empty property name when done.
+? Property name: startDate
+   invoke   loopback:property
+? Property type: date
+? Required? Yes
+? Default value[leave blank for none]:
+
+Let&#x27;s add another reservation property.
+Enter an empty property name when done.
+? Property name: endDate
+   invoke   loopback:property
+? Property type: date
+? Required? Yes
+? Default value[leave blank for none]:
+
+Let&#x27;s add another reservation property.
+Enter an empty property name when done.
+? Property name:&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;relations&quot;&gt;Relations&lt;/h2&gt;
+
+&lt;p&gt;Campgrounds can have zero or more reservations. We have to create a
+&lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Define-model-relations.html&quot;&gt;relationship between our models&lt;/a&gt; to accomplish this, &lt;code&gt;lb
+relation&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Select the model to create the relationship from: campground
+? Relation type: has many
+? Choose a model to create a relationship with: reservation
+? Enter the property name for the relation: reservations
+? Optionally enter a custom foreign key:
+? Require a through model? No&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the server again and go to the API Explorer. You will see some new endpoints for /campgrounds/{id}/reservations.&lt;/p&gt;
+
+&lt;p&gt;Let’s update our test data so we have a couple of reservations for our campgrounds.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;ids&amp;quot;: {
+    &amp;quot;campground&amp;quot;: 5,
+    &amp;quot;reservation&amp;quot;: 3
+  },
+  &amp;quot;models&amp;quot;: {
+     &amp;quot;campground&amp;quot;: {
+       &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Salt Lake City KOA\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 40.772112, \&amp;quot;lng\&amp;quot;: -111.932165},\&amp;quot;id\&amp;quot;:1}&amp;quot;,
+       &amp;quot;2&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Gouldings Campground\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 37.006989, \&amp;quot;lng\&amp;quot;: -110.214907},\&amp;quot;id\&amp;quot;:2}&amp;quot;,
+       &amp;quot;3&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Grand Canyon Mather Campground\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 36.056472, \&amp;quot;lng\&amp;quot;: -112.140728},\&amp;quot;id\&amp;quot;:3}&amp;quot;,
+       &amp;quot;4&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Camping Paris Bois de Boulogne\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 48.868879, \&amp;quot;lng\&amp;quot;: 2.234914},\&amp;quot;id\&amp;quot;:4}&amp;quot;
+     },
+     &amp;quot;reservation&amp;quot;: {
+       &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;startDate\&amp;quot;:\&amp;quot;2017-03-21\&amp;quot;,\&amp;quot;endDate\&amp;quot;:\&amp;quot;2017-03-23\&amp;quot;,\&amp;quot;campgroundId\&amp;quot;:1,\&amp;quot;id\&amp;quot;:1}&amp;quot;,
+       &amp;quot;2&amp;quot;: &amp;quot;{\&amp;quot;startDate\&amp;quot;:\&amp;quot;2017-03-25\&amp;quot;,\&amp;quot;endDate\&amp;quot;:\&amp;quot;2017-03-31\&amp;quot;,\&amp;quot;campgroundId\&amp;quot;:2,\&amp;quot;id\&amp;quot;:2}&amp;quot;
+     }
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;queries&quot;&gt;Queries&lt;/h2&gt;
+
+&lt;p&gt;Loopback endpoints can also be used to &lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Querying-data.html&quot;&gt;query specific data&lt;/a&gt;.
+Here’s a selection of what is possible out of the box:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Show all campgrounds with ’KOA’ in there name
+    &lt;code&gt;/api/campgrounds?filter[where][name][like]&#x3D;KOA&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show all reservations after or on 2017–03–22
+    &lt;code&gt;/api/reservations?filter[where][startDate][gte]&#x3D;2017-03-22&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show only the names of the campgrounds:
+    &lt;code&gt;/api/campgrounds?filter[fields][name]&#x3D;true&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show everything but the names of the campgrounds:
+    &lt;code&gt;/api/campgrounds?filter[fields][name]&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show campgrounds and include their reservations:
+    &lt;code&gt;/api/campgrounds?filter[include][reservations]&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show the first 2 campgrounds:
+    &lt;code&gt;/api/campgrounds?filter[limit]&#x3D;2&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Show the next 2 campgrounds:
+    &lt;code&gt;/api/campgrounds?filter[skip]&#x3D;2&amp;amp;filter[limit]&#x3D;2&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Order campgrounds by name
+    &lt;code&gt;/api/campgrounds?filter[order]&#x3D;name&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Descending order campgrounds by name:
+    &lt;code&gt;/api/campgrounds?filter[order]&#x3D;name%20DESC&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id&#x3D;&quot;geolocation&quot;&gt;Geolocation&lt;/h2&gt;
+
+&lt;p&gt;You can also query based on geolocation. The location of our campground is a
+&lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Geotype.html&quot;&gt;geopoint&lt;/a&gt;.
+Imagine we are at Arches Nation Park and we want to search for all campgrounds within a 200 mile radius:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/api/campgrounds?filter[where][location][near]&#x3D;38.7006538,-109.5643742&amp;amp;filter[where][location][maxDistance]&#x3D;200&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;validation&quot;&gt;Validation&lt;/h2&gt;
+
+&lt;p&gt;When we created the campground model, we made the name required. If we try to create a campground without a name,
+loopback will give us a validation error saying that the field cannot be blank. &lt;/p&gt;
+
+&lt;p&gt;Loopback also has some built-in
+&lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb2/Validating-model-data.html#using-validation-methods&quot;&gt;validation methods&lt;/a&gt; for frequently
+used validation. The name of our campground should have max. 100 characters. We can implement this by adding the
+following code to server/models/campground.js:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&#x27;use strict&#x27;;
+
+module.exports &#x3D; function(Campground) {
+ Campground.validatesLengthOf(&#x27;name&#x27;, {max: 100, message: {max: &#x27;Name is too long&#x27;}});
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also add custom validation. For a reservation, the endDate should be after the startDate:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&#x27;use strict&#x27;;
+
+module.exports &#x3D; function(Reservation) {
+  Reservation.validate(&#x27;startDate&#x27;, dateValidator, {message: &#x27;endDate should be after startDate&#x27;});
+    function dateValidator(err) {
+      if(this.startDate &amp;gt;&#x3D; this.endDate) {
+        err();
+      }
+    }
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;security&quot;&gt;Security&lt;/h2&gt;
+
+&lt;p&gt;All our endpoints are public. We should add some security here. Our example will have 3 types of users. Anonymous
+users should be able to see all campgrounds. When they register, they will become customers who can make reservations
+and can see only there own reservations.&lt;/p&gt;
+
+&lt;p&gt;Administrators should be able to see and do anything. Loopback has
+&lt;a href&#x3D;&quot;http://loopback.io/doc/en/lb3/Using-built-in-models.html&quot;&gt;built-in models&lt;/a&gt; for security, but it is advised not to use
+them directly. We will create a customer model that extends from the User model. &lt;code&gt;lb model&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Enter the model name: customer
+? Select the data-source to attach customer to: reservationDS (memory)
+? Select model&#x27;s base class User
+? Expose customer via the REST API? Yes
+? Custom plural form (used to build REST URL):
+? Common model or server only? server
+Let&#x27;s add some customer properties now.
+
+Enter an empty property name when done.
+? Property name: name
+   invoke   loopback:property
+? Property type: string
+? Required? No
+? Default value[leave blank for none]:
+
+Let&#x27;s add another customer property.
+Enter an empty property name when done.
+? Property name:&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Customers can have zero or more reservations. Let&#x27;s create a relation here, &lt;code&gt;lb relation&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Select the model to create the relationship from: customer
+? Relation type: has many
+? Choose a model to create a relationship with: reservation
+? Enter the property name for the relation: reservations
+? Optionally enter a custom foreign key:
+? Require a through model? No&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since we started from an empty server, the built-in models are not defined in server/model-config.json. Let&#x27;s add those
+now.&lt;/p&gt;
+
+&lt;p&gt;Setting the &#x27;public&#x27; property to false means that they will not be public and will not be shown in our API explorer.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;_meta&amp;quot;: {
+    &amp;quot;sources&amp;quot;: [
+      &amp;quot;loopback/common/models&amp;quot;,
+      &amp;quot;loopback/server/models&amp;quot;,
+      &amp;quot;../common/models&amp;quot;,
+      &amp;quot;./models&amp;quot;
+    ],
+    &amp;quot;mixins&amp;quot;: [
+      &amp;quot;loopback/common/mixins&amp;quot;,
+      &amp;quot;loopback/server/mixins&amp;quot;,
+      &amp;quot;../common/mixins&amp;quot;,
+      &amp;quot;./mixins&amp;quot;
+    ]
+  },
+  &amp;quot;campground&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: true
+  },
+  &amp;quot;reservation&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: true
+  },
+  &amp;quot;customer&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: true
+  },
+  &amp;quot;User&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;AccessToken&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;ACL&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;RoleMapping&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;Role&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will now add 3 users to application:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Andy, our administrator : (username: andy, password: andy)&lt;/li&gt;
+  &lt;li&gt;Kenneth, a customer : (username: kenneth, password: kenneth)&lt;/li&gt;
+  &lt;li&gt;Claudiu, another customer: (username: claudiu, password: claudiu)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The passwords need to be hashed in the db.json file. We also link our reservations to our
+customers, by adding customerId to the reservation table.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;ids&amp;quot;: {
+    &amp;quot;campground&amp;quot;: 5,
+    &amp;quot;reservation&amp;quot;: 3,
+    &amp;quot;customer&amp;quot;: 4,
+    &amp;quot;AccessToken&amp;quot;: 1,
+    &amp;quot;ACL&amp;quot;: 1,
+    &amp;quot;RoleMapping&amp;quot;: 1,
+    &amp;quot;Role&amp;quot;: 1
+  },
+  &amp;quot;models&amp;quot;: {
+    &amp;quot;campground&amp;quot;: {
+      &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Salt Lake City KOA\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 40.772112, \&amp;quot;lng\&amp;quot;: -111.932165},\&amp;quot;id\&amp;quot;:1}&amp;quot;,
+      &amp;quot;2&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Gouldings Campground\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 37.006989, \&amp;quot;lng\&amp;quot;: -110.214907},\&amp;quot;id\&amp;quot;:2}&amp;quot;,
+      &amp;quot;3&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Grand Canyon Mather Campground\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 36.056472, \&amp;quot;lng\&amp;quot;: -112.140728},\&amp;quot;id\&amp;quot;:3}&amp;quot;,
+      &amp;quot;4&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Camping Paris Bois de Boulogne\&amp;quot;,\&amp;quot;location\&amp;quot;:{\&amp;quot;lat\&amp;quot;: 48.868879, \&amp;quot;lng\&amp;quot;: 2.234914},\&amp;quot;id\&amp;quot;:4}&amp;quot;
+    },
+    &amp;quot;reservation&amp;quot;: {
+      &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;startDate\&amp;quot;:\&amp;quot;2017-03-21\&amp;quot;,\&amp;quot;endDate\&amp;quot;:\&amp;quot;2017-03-23\&amp;quot;,\&amp;quot;campgroundId\&amp;quot;:1,\&amp;quot;customerId\&amp;quot;:2,\&amp;quot;id\&amp;quot;:1}&amp;quot;,
+      &amp;quot;2&amp;quot;: &amp;quot;{\&amp;quot;startDate\&amp;quot;:\&amp;quot;2017-03-25\&amp;quot;,\&amp;quot;endDate\&amp;quot;:\&amp;quot;2017-03-31\&amp;quot;,\&amp;quot;campgroundId\&amp;quot;:2,\&amp;quot;customerId\&amp;quot;:3,\&amp;quot;id\&amp;quot;:2}&amp;quot;
+    },
+    &amp;quot;customer&amp;quot;: {
+      &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Andy Van Den Heuvel\&amp;quot;,\&amp;quot;username\&amp;quot;:\&amp;quot;andy\&amp;quot;,\&amp;quot;password\&amp;quot;:\&amp;quot;$2a$10$1lmPRI0Xjd5fU8HGdPmDoOkZpIPJj2axcdJYIfc/3RUnBDDqQe31K\&amp;quot;,\&amp;quot;email\&amp;quot;:\&amp;quot;andy@optis.be\&amp;quot;,\&amp;quot;id\&amp;quot;:1}&amp;quot;,
+      &amp;quot;2&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Kenneth Van den Berghe\&amp;quot;,\&amp;quot;username\&amp;quot;:\&amp;quot;kenneth\&amp;quot;,\&amp;quot;password\&amp;quot;:\&amp;quot;$2a$10$H5wtnFvhxf8CPn66gEbPu.tki2WRpkplqvUV3yhQ049ugY8rHFSJi\&amp;quot;,\&amp;quot;email\&amp;quot;:\&amp;quot;kenneth@optis.be\&amp;quot;,\&amp;quot;id\&amp;quot;:2}&amp;quot;,
+      &amp;quot;3&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;Claudiu Matei\&amp;quot;,\&amp;quot;username\&amp;quot;:\&amp;quot;claudiu\&amp;quot;,\&amp;quot;password\&amp;quot;:\&amp;quot;$2a$10$6b9jxIwb6y84gpq.ZU57YegRM4BWxHoXc.K/WwlEOJTa/9fO7cCta\&amp;quot;,\&amp;quot;email\&amp;quot;:\&amp;quot;claudiu@optis.be\&amp;quot;,\&amp;quot;id\&amp;quot;:3}&amp;quot;
+    },
+    &amp;quot;AccessToken&amp;quot;: {},
+    &amp;quot;ACL&amp;quot;: {},
+    &amp;quot;RoleMapping&amp;quot;: {
+      &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;principalType\&amp;quot;:\&amp;quot;USER\&amp;quot;,\&amp;quot;principalId\&amp;quot;:\&amp;quot;1\&amp;quot;,\&amp;quot;roleId\&amp;quot;:1,\&amp;quot;id\&amp;quot;:1}&amp;quot;
+    },
+    &amp;quot;Role&amp;quot;: {
+      &amp;quot;1&amp;quot;: &amp;quot;{\&amp;quot;name\&amp;quot;:\&amp;quot;admin\&amp;quot;,\&amp;quot;created\&amp;quot;:\&amp;quot;2017-02-21T06:07:25.571Z\&amp;quot;,\&amp;quot;modified\&amp;quot;:\&amp;quot;2017-02-21T06:07:25.571Z\&amp;quot;,\&amp;quot;id\&amp;quot;:1}&amp;quot;
+    }
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will now activate our authentication. To do this, we must add a
+&lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Defining-boot-scripts.html&quot;&gt;bootscript&lt;/a&gt;. Create a new file
+server/boot/authentication.js with the following content and restart your server afterwards.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&#x27;use strict&#x27;;
+
+module.exports &#x3D; function enableAuthentication(server) {
+  server.enableAuth();
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Authentication is now enabled, but all endpoints are still public because we haven&#x27;t configured any authorization.
+Loopback uses &lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Controlling-data-access.html&quot;&gt;access control lists&lt;/a&gt; for this. Let&#x27;s add
+some rules here.&lt;/p&gt;
+
+&lt;p&gt;First deny all access to everybody, &lt;code&gt;lb acl&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Select the model to apply the ACL entry to: (all existing models)
+? Select the ACL scope: All methods and properties
+? Select the access type: All (match all types)
+? Select the role All users
+? Select the permission to apply Explicitly deny access&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now allow everybody to view the campgrounds, &lt;code&gt;lb acl&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Select the model to apply the ACL entry to: campground
+? Select the ACL scope: All methods and properties
+? Select the access type: Read
+? Select the role All users
+? Select the permission to apply Explicitly grant access
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also, allow every customer to their own info, &lt;code&gt;lb acl&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Select the model to apply the ACL entry to: customer
+? Select the ACL scope: All methods and properties
+? Select the access type: All (match all types)
+? Select the role The user owning the object
+? Select the permission to apply Explicitly grant access&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And as a last rule, allow administrators to do and see all, &lt;code&gt;lb acl&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Select the model to apply the ACL entry to: (all existing models)
+? Select the ACL scope: All methods and properties
+? Select the access type: All (match all types)
+? Select the role other
+? Enter the role name: admin
+? Select the permission to apply Explicitly grant access&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start your server and go to http://localhost:3000/api/campgrounds. As an anonymous user I can still see all campgrounds.
+When I go to http://localhost:3000/api/reservations, I get a 401 Authorization Required.&lt;/p&gt;
+
+&lt;p&gt;We will now log in as Kenneth to see his reservations. Go to http://localhost:3000/explorer/#!/customer/customer_login
+and log in:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/loopback_login.png&quot; alt&#x3D;&quot;Login&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The id of the response is a generated access token. You can now copy it and set it in the header to provide the access
+token for all calls in the API Explorer.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/loopback_token.png&quot; alt&#x3D;&quot;Login&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Or you can add the access token as a request parameter. Let&#x27;s try this out.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;As Kenneth, I can see my own reservations: &lt;code&gt;/api/customers/2/reservations?access_token&#x3D;XMFN5GsykpxFokvWsXRYtKZidlJYKyClvak0KmEn87LisnFYSQ9TzmrBcz9GFrHv&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Asking Claudiu&#x27;s reservations results in an 401 unauthorized: &lt;code&gt;/api/customers/3/reservations?access_token&#x3D;XMFN5GsykpxFokvWsXRYtKZidlJYKyClvak0KmEn87LisnFYSQ9TzmrBcz9GFrHv&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;As Claudiu, I can see my own reservation: &lt;code&gt;/api/customers/3/reservations?access_token&#x3D;v51y2iZa1nkKTWC7s1yKELaIatfDJPVxcEEVa6FFIG4llZCGyZVbwR4plhfpYAxx&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;But I can&#x27;t see Kenneth&#x27;s reservations: &lt;code&gt;/api/customers/2/reservations?access_token&#x3D;v51y2iZa1nkKTWC7s1yKELaIatfDJPVxcEEVa6FFIG4llZCGyZVbwR4plhfpYAxx&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;As Andy, I can see Kenneth&#x27;s reservations: &lt;code&gt;/api/customers/2/reservations?access_token&#x3D;okxVkWcdoVzWb3WmCK9KkiuBArz1HOOHrIn1h2mOfa0kBzeUna1V9wFmFRe6BCHe&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;And also Claudiu&#x27;s reservations: &lt;code&gt;/api/customers/3/reservations?access_token&#x3D;okxVkWcdoVzWb3WmCK9KkiuBArz1HOOHrIn1h2mOfa0kBzeUna1V9wFmFRe6BCHe&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;As Andy you can also see all reservations: &lt;code&gt;/api/reservations?access_token&#x3D;okxVkWcdoVzWb3WmCK9KkiuBArz1HOOHrIn1h2mOfa0kBzeUna1V9wFmFRe6BCHe&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id&#x3D;&quot;application_logic&quot;&gt;Application logic&lt;/h2&gt;
+
+&lt;p&gt;Up to this point, we were able to build a fully functioning REST API, mostly from generating code. But more advanced
+applications will almost always need some extra application logic.&lt;/p&gt;
+
+&lt;p&gt;Loopback allows you to add remote methods, remote hooks and operation hooks. Remote hooks and operation hooks are
+practically the same. The difference is that operational hooks are more high-level defined, whereas remote hooks are
+more specific to an endpoint.&lt;/p&gt;
+
+&lt;p&gt;In our example, we want to send a verification email when a customer has made a reservation. Loopback has an [email
+connector](https://loopback.io/doc/en/lb3/Email-connector.html) available based on &lt;a href&#x3D;&quot;https://nodemailer.com&quot;&gt;Nodemailer&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Go to server/datasources.json and add the email configuration. I used gmail for this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;reservationDS&amp;quot;: {
+    &amp;quot;name&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;localStorage&amp;quot;: &amp;quot;&amp;quot;,
+    &amp;quot;file&amp;quot;: &amp;quot;db.json&amp;quot;,
+    &amp;quot;connector&amp;quot;: &amp;quot;memory&amp;quot;
+  },
+  &amp;quot;emailDS&amp;quot;: {
+    &amp;quot;name&amp;quot;: &amp;quot;mail&amp;quot;,
+    &amp;quot;connector&amp;quot;: &amp;quot;mail&amp;quot;,
+    &amp;quot;transports&amp;quot;: [{
+      &amp;quot;type&amp;quot;: &amp;quot;SMTP&amp;quot;,
+      &amp;quot;host&amp;quot;: &amp;quot;smtp.gmail.com&amp;quot;,
+      &amp;quot;secure&amp;quot;: true,
+      &amp;quot;port&amp;quot;: 465,
+      &amp;quot;auth&amp;quot;: {
+        &amp;quot;user&amp;quot;: &amp;quot;YOUR_USER&amp;quot;,
+        &amp;quot;pass&amp;quot;: &amp;quot;YOUR_PASSWORD&amp;quot;
+      }
+    }]
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we bind the datasource in server/models-config.js:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;_meta&amp;quot;: {
+    &amp;quot;sources&amp;quot;: [
+      &amp;quot;loopback/common/models&amp;quot;,
+      &amp;quot;loopback/server/models&amp;quot;,
+      &amp;quot;../common/models&amp;quot;,
+      &amp;quot;./models&amp;quot;
+    ],
+    &amp;quot;mixins&amp;quot;: [
+      &amp;quot;loopback/common/mixins&amp;quot;,
+      &amp;quot;loopback/server/mixins&amp;quot;,
+      &amp;quot;../common/mixins&amp;quot;,
+      &amp;quot;./mixins&amp;quot;
+    ]
+  },
+  &amp;quot;campground&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: true
+  },
+  &amp;quot;reservation&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: true
+  },
+  &amp;quot;customer&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: true
+  },
+  &amp;quot;User&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;AccessToken&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;ACL&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;RoleMapping&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;Role&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;public&amp;quot;: false
+  },
+  &amp;quot;Email&amp;quot;: {
+    &amp;quot;dataSource&amp;quot;: &amp;quot;emailDS&amp;quot;
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Go to server/models/reservation.js and add the logic to send and email after save:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&#x27;use strict&#x27;;
+
+module.exports &#x3D; function (Reservation) {
+  Reservation.validate(&#x27;startDate&#x27;, dateValidator, {message: &#x27;endDate should be after startDate&#x27;});
+  function dateValidator(err) {
+    if (this.startDate &amp;gt;&#x3D; this.endDate) {
+      err();
+    }
+  }
+
+  Reservation.observe(&amp;quot;after save&amp;quot;, function (ctx, next) {
+    Reservation.app.models.Campground.findById(ctx.instance.campgroundId, function (err, campground) {
+      Reservation.app.models.Email.send({
+        to: &#x27;andy@optis.be&#x27;,
+        from: &#x27;noreply@optis.be&#x27;,
+        subject: &#x27;Thank you for your reservation at &#x27; + campground.name,
+        html: &#x27;&amp;lt;p&amp;gt;We confirm your reservation for &amp;lt;strong&amp;gt;&#x27; + campground.name + &#x27;&amp;lt;/strong&amp;gt;&amp;lt;/p&amp;gt;&#x27;
+      }, function (err, mail) {
+        console.log(&#x27;email sent!&#x27;);
+      });
+    });
+    next();
+  });
+
+};&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;storage&quot;&gt;Storage&lt;/h2&gt;
+
+&lt;p&gt;If you are interested in uploading/downloading files from your API, you can use Loopback&#x27;s
+&lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Storage-component.html&quot;&gt;Storage Component&lt;/a&gt;. For this, you need to install the storage
+component via NPM:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install loopback-component-storage --save&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Just like with emails, the storage component is called a datasource. Let&#x27;s add it to server/datasources.json&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;reservationDS&amp;quot;: {
+    &amp;quot;name&amp;quot;: &amp;quot;reservationDS&amp;quot;,
+    &amp;quot;localStorage&amp;quot;: &amp;quot;&amp;quot;,
+    &amp;quot;file&amp;quot;: &amp;quot;db.json&amp;quot;,
+    &amp;quot;connector&amp;quot;: &amp;quot;memory&amp;quot;
+  },
+  &amp;quot;emailDS&amp;quot;: {
+    &amp;quot;name&amp;quot;: &amp;quot;mail&amp;quot;,
+    &amp;quot;connector&amp;quot;: &amp;quot;mail&amp;quot;,
+    &amp;quot;transports&amp;quot;: [{
+      &amp;quot;type&amp;quot;: &amp;quot;SMTP&amp;quot;,
+      &amp;quot;host&amp;quot;: &amp;quot;smtp.gmail.com&amp;quot;,
+      &amp;quot;secure&amp;quot;: true,
+      &amp;quot;port&amp;quot;: 465,
+      &amp;quot;auth&amp;quot;: {
+        &amp;quot;user&amp;quot;: &amp;quot;YOUR_USER&amp;quot;,
+        &amp;quot;pass&amp;quot;: &amp;quot;YOUR_PASSWORD&amp;quot;
+      }
+    }]
+  },
+  &amp;quot;photos&amp;quot;: {
+    &amp;quot;name&amp;quot;: &amp;quot;photos&amp;quot;,
+    &amp;quot;connector&amp;quot;: &amp;quot;loopback-component-storage&amp;quot;,
+    &amp;quot;provider&amp;quot;: &amp;quot;filesystem&amp;quot;,
+    &amp;quot;root&amp;quot;: &amp;quot;./server/files&amp;quot;
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We use our local filesystem as the provider here, but the storage component uses
+&lt;a href&#x3D;&quot;https://github.com/pkgcloud/pkgcloud&quot;&gt;pkgcloud&lt;/a&gt; to support multiple cloud providers (Amazon, Azure, Google, HP,
+Openstack, Rackspace)&lt;/p&gt;
+
+&lt;p&gt;Loopback keeps files in containers. We have to make a container model so we can create a container for our photos,
+&lt;code&gt;lb model&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;? Enter the model name: container
+? Select the data-source to attach container to: photos (loopback-component-storage)
+? Select model&#x27;s base class Model
+? Expose container via the REST API? Yes
+? Custom plural form (used to build REST URL):
+? Common model or server only? server
+Let&#x27;s add some container properties now.
+
+Enter an empty property name when done.
+? Property name:&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create the server/files/photos folder, so we can upload some photos to it and start your server. When you go to the
+API explorer, you can see the /containers endpoint, but we haven&#x27;t created any containers yet. For this part, we are
+going to use curl.&lt;/p&gt;
+
+&lt;p&gt;Create the container &#x27;photos&#x27;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;curl -X GET --header &#x27;Accept: application/json&#x27; &#x27;http://localhost:3000/api/containers/photos&#x27;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Upload to the &#x27;photos&#x27;-container:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;curl -F &amp;quot;image&#x3D;@image.jpg&amp;quot; http://localhost:3000/api/containers/photos/upload&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Download from the &#x27;photos&#x27;-container:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;http://localhost:3000/api/containers/photos/download/image.jpg&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;testing&quot;&gt;Testing&lt;/h2&gt;
+
+&lt;p&gt;We are almost ready, but we want to ensure we can test our endpoints.
+We will use &lt;a href&#x3D;&quot;http://mochajs.org&quot;&gt;mocha&lt;/a&gt;, &lt;a href&#x3D;&quot;http://chaijs.com&quot;&gt;chai&lt;/a&gt; and &lt;a href&#x3D;&quot;http://chaijs.com/plugins/chai-http&quot;&gt;chai-http&lt;/a&gt;
+for this.&lt;/p&gt;
+
+&lt;p&gt;If you haven&#x27;t mocha on your machine. Install it globally via npm&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g mocha&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then install chai and chai-http for the project:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install chai chai-http --save-dev&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can now write a test at test/campground.js. I haven&#x27;t written the complete testsuite here, just a few tests so you
+get the idea. chai will make sure that the server is started before we do the request, and stopped after the test.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&#x27;use strict&#x27;;
+
+var chai &#x3D; require(&#x27;chai&#x27;);
+var chaiHttp &#x3D; require(&#x27;chai-http&#x27;);
+var server &#x3D; require(&#x27;../server/server&#x27;);
+var should &#x3D; chai.should();
+
+chai.use(chaiHttp);
+
+describe(&#x27;Campgrounds&#x27;, function() {
+  it(&#x27;should show all campgrounds on GET /api/campgrounds&#x27;, function(done) {
+    chai.request(server)
+      .get(&#x27;/api/campgrounds&#x27;)
+      .end(function(err, res) {
+        res.should.have.status(200);
+        res.body.should.have.lengthOf(4);
+        done();
+      });
+  });
+
+  it(&#x27;should show only the names of the campgrounds on GET /api/campgrounds?filter[fields][name]&#x3D;true&#x27;, function(done) {
+    chai.request(server)
+      .get(&#x27;/api/campgrounds?filter[fields][name]&#x3D;true&#x27;)
+      .end(function(err, res) {
+        res.should.have.status(200);
+        res.body[0].should.have.property(&#x27;name&#x27;);
+        res.body[0].should.not.have.property(&#x27;id&#x27;);
+        done();
+      });
+  });
+
+  it(&#x27;should show the first 2 campgrounds on GET /api/campgrounds?filter[limit]&#x3D;2&#x27;, function(done) {
+    chai.request(server)
+      .get(&#x27;/api/campgrounds?filter[limit]&#x3D;2&#x27;)
+      .end(function(err, res) {
+        res.should.have.status(200);
+        res.body.should.have.lengthOf(2);
+        res.body[0].name.should.equal(&#x27;Salt Lake City KOA&#x27;);
+        res.body[1].name.should.equal(&#x27;Gouldings Campground&#x27;);
+        done();
+      });
+  });
+
+  it(&#x27;should show the last 2 campgrounds on GET /api/campgrounds?filter[skip]&#x3D;2&amp;amp;filter[limit]&#x3D;2&#x27;, function(done) {
+    chai.request(server)
+      .get(&#x27;/api/campgrounds?filter[skip]&#x3D;2&amp;amp;filter[limit]&#x3D;2&#x27;)
+      .end(function(err, res) {
+        res.should.have.status(200);
+        res.body.should.have.lengthOf(2);
+        res.body[0].name.should.equal(&#x27;Grand Canyon Mather Campground&#x27;);
+        res.body[1].name.should.equal(&#x27;Camping Paris Bois de Boulogne&#x27;);
+        done();
+      });
+  });
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Run the command &lt;code&gt;mocha&lt;/code&gt; now and you should see all tests passing:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/loopback_testing.png&quot; alt&#x3D;&quot;testing&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Ok, we&#x27;re almost done now. Last stop: Deploy to Production.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;deployment&quot;&gt;Deployment&lt;/h2&gt;
+
+&lt;p&gt;In order to go to production, we need some
+&lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/Environment-specific-configuration.html&quot;&gt;Environment-specific configuration&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Loopback has naming conventions for this. For security reasons, we don&#x27;t want to show the API explorer when running in
+production. Create a file named /server/component-config.prod.json&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;loopback-component-explorer&amp;quot;: null
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We also don&#x27;t want to work against an in-memory database. We will switch to mongoDB here.
+We will have to install the &lt;a href&#x3D;&quot;https://loopback.io/doc/en/lb3/MongoDB-connector.html&quot;&gt;MongoDB Connector&lt;/a&gt; for it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install loopback-connector-mongodb --save&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I will use an &lt;a href&#x3D;&quot;https://mlab.com&quot;&gt;MLab&lt;/a&gt;-hosted MongoDB. You can sign up and create a free sandbox here too.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Create a database &#x27;reservations&#x27;&lt;/li&gt;
+  &lt;li&gt;The username credentials you used to signup for MLab are not used to connect in your application, make sure you
+    create a database user here:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/loopback_mlab.png&quot; alt&#x3D;&quot;MLab&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Create a new file called server/datasources.prod.json and add your mongodb settings:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;reservationDS&amp;quot;: {
+    &amp;quot;host&amp;quot;: &amp;quot;YOUR_HOST&amp;quot;,
+    &amp;quot;port&amp;quot;: 0,
+    &amp;quot;url&amp;quot;:  false,
+    &amp;quot;database&amp;quot;: &amp;quot;reservations&amp;quot;,
+    &amp;quot;name&amp;quot;: &amp;quot;reservations&amp;quot;,
+    &amp;quot;connector&amp;quot;: &amp;quot;mongodb&amp;quot;,
+    &amp;quot;user&amp;quot;: &amp;quot;YOUR_USERNAME&amp;quot;,
+    &amp;quot;password&amp;quot;: &amp;quot;YOUR_PASSWORD&amp;quot;
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice dat we use the naming pattern componenet-config.env.json and datasources.env.json here.
+Loopback uses NODE_ENV to decide what config should be loaded. Let&#x27;s change our environment to prod.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export NODE_ENV&#x3D;&amp;quot;prod&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Loopback will now use our new configuration. Our explorer is disabled and we can still use are api, this time through
+MongoDB:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;http://localhost:3000/api/campgrounds&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since we are working on mongoDB now, we don&#x27;t have any test data available anymore. Let&#x27;s create a collection
+&#x27;campground&#x27; and when you click on the collection, you can add a new document.&lt;/p&gt;
+
+&lt;p&gt;You can do all of this inside the mLab web interface. E.g:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;name&amp;quot;: &amp;quot;Salt Lake City KOA&amp;quot;,
+    &amp;quot;location&amp;quot;:{
+        &amp;quot;lat&amp;quot;: 40.772112,
+        &amp;quot;lng&amp;quot;: -111.932165
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you created the document and go to http://localhost:3000/api/campgrounds and you should see the newly created.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;info&quot;&gt;Info&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Published: Mar 24, 2017&lt;/li&gt;
+  &lt;li&gt;Last updated: Nov 14, 2017&lt;/li&gt;
+  &lt;li&gt;Source code: &lt;a href&#x3D;&quot;https://github.com/codeaddslife/loopback&quot;&gt;https://github.com/codeaddslife/loopback&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+        </item>
+        <item>
+            <title>Progressive web apps</title>
+            <link>https://www.codeaddslife.com/articles/progressive-web-apps.html</link>
+            <description>&lt;h1 id&#x3D;&quot;progressive_web_apps&quot;&gt;Progressive web apps&lt;/h1&gt;
+
+&lt;p&gt;The term &lt;a href&#x3D;&quot;https://developers.google.com/web/progressive-web-apps/&quot;&gt;Progressive web apps&lt;/a&gt; was coined in
+&lt;a href&#x3D;&quot;https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/&quot;&gt;june 2015&lt;/a&gt; by Alex Russell
+and Frances Berriman to bridge the gap between web apps and native apps. In this article, we will create a fully
+functioning progressive web app to show the main concepts in more detail.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;what_are_progressive_web_apps?&quot;&gt;What are progressive web apps?&lt;/h2&gt;
+
+&lt;p&gt;Progressive web apps (PWA) are web applications that &lt;em&gt;progress over time&lt;/em&gt;. If you happen to visit a website a lot, it
+can be great to cache some of these assets offline or to install it on the homescreen.&lt;/p&gt;
+
+&lt;p&gt;It is build on the foundation of &lt;a href&#x3D;&quot;https://alistapart.com/article/understandingprogressiveenhancement&quot;&gt;progressive enhancement&lt;/a&gt; and
+&lt;a href&#x3D;&quot;https://www.smashingmagazine.com/2011/01/guidelines-for-responsive-web-design&quot;&gt;responsive web design&lt;/a&gt;. Like any modern
+website, it should work for anybody anywhere and use more modern browser features when they are available.&lt;/p&gt;
+
+&lt;p&gt;Progressive web apps differ from hybrid apps as they are not installed via an app store (A process where you typically
+&lt;a href&#x3D;&quot;http://blog.gaborcselle.com/2012/10/every-step-costs-you-20-of-users.html&quot;&gt;loose a lot of potential users&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;They are updated on the server, which costs less to maintain since all users are on the same version. PWA&#x27;s rely heaviliy on service workers to provide
+a native app-like experience.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;example&quot;&gt;Example&lt;/h2&gt;
+
+&lt;p&gt;In this article, we will build a progressive web app for my hometown&#x27;s
+&lt;a href&#x3D;&quot;https://www.velo-antwerpen.be/en&quot;&gt;bike renting service Velo&lt;/a&gt;. A lot of cities have such a renting service nowadays as
+part of their public transport system. In our app, we want to show the availability of bikes per station (And also show the closest
+station, if you wanted to hop onto a bike right away).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_velo.jpg&quot; alt&#x3D;&quot;velo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I used &lt;a href&#x3D;&quot;vuejs.org&quot;&gt;Vue.js&lt;/a&gt; for this. This application is kept as simple as possible to focus on the PWA-specific parts.
+For a real world Vue.js application, you might want to check out Vue&#x27;s &lt;a href&#x3D;&quot;https://github.com/vuejs/vue-cli&quot;&gt;CLI tool&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;getting_started&quot;&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;First off, we start with a basic web application. The index.html-file will look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html&amp;gt;
+    &amp;lt;head&amp;gt;
+        &amp;lt;title&amp;gt;MyBike&amp;lt;/title&amp;gt;
+        &amp;lt;link rel&#x3D;&amp;quot;icon&amp;quot; type&#x3D;&amp;quot;image/png&amp;quot; href&#x3D;&amp;quot;img/favicon.png&amp;quot;&amp;gt;
+        &amp;lt;link rel&#x3D;&amp;quot;stylesheet&amp;quot; href&#x3D;&amp;quot;main.css&amp;quot; media&#x3D;&amp;quot;all&amp;quot; /&amp;gt;
+        &amp;lt;meta name&#x3D;&amp;quot;viewport&amp;quot; content&#x3D;&amp;quot;width&#x3D;device-width, initial-scale&#x3D;1&amp;quot;&amp;gt;
+        &amp;lt;meta name&#x3D;&amp;quot;theme-color&amp;quot; content&#x3D;&amp;quot;#ffffff&amp;quot;&amp;gt;
+    &amp;lt;/head&amp;gt;
+    &amp;lt;body&amp;gt;
+        &amp;lt;div id&#x3D;&amp;quot;app&amp;quot;&amp;gt;
+            &amp;lt;div id&#x3D;&amp;quot;logo&amp;quot;&amp;gt;
+                &amp;lt;img src&#x3D;&amp;quot;img/logo.png&amp;quot; alt&#x3D;&amp;quot;MyBike&amp;quot; /&amp;gt;
+            &amp;lt;/div&amp;gt;
+            &amp;lt;ul class&#x3D;&amp;quot;stations&amp;quot;&amp;gt;
+                &amp;lt;li v-for&#x3D;&amp;quot;station in stations&amp;quot;&amp;gt;
+                    &amp;lt;div class&#x3D;&amp;quot;station&amp;quot;&amp;gt;
+                        &amp;lt;div class&#x3D;&amp;quot;status&amp;quot;&amp;gt;
+                            &amp;lt;img v-if&#x3D;&amp;quot;station.bikes &#x3D;&#x3D; station.slots&amp;quot; src&#x3D;&amp;quot;img/status-full.png&amp;quot; alt&#x3D;&amp;quot;{{station.address}}&amp;quot; /&amp;gt;
+                            &amp;lt;img v-else-if&#x3D;&amp;quot;station.bikes &amp;gt; 0&amp;quot; src&#x3D;&amp;quot;img/status-available.png&amp;quot; alt&#x3D;&amp;quot;{{station.address}}&amp;quot; /&amp;gt;
+                            &amp;lt;img v-else-if&#x3D;&amp;quot;station.bikes &#x3D;&#x3D; 0&amp;quot; src&#x3D;&amp;quot;img/status-empty.png&amp;quot; alt&#x3D;&amp;quot;{{station.address}}&amp;quot; /&amp;gt;
+                            &amp;lt;img v-else-if&#x3D;&amp;quot;station.status !&#x3D; OPN&amp;quot; src&#x3D;&amp;quot;img/status-closed.png&amp;quot; alt&#x3D;&amp;quot;{{station.address}}&amp;quot; /&amp;gt;
+                        &amp;lt;/div&amp;gt;
+                        &amp;lt;strong&amp;gt;{{station.address}} {{station.addressNumber}}&amp;lt;/strong&amp;gt;
+                        &amp;lt;div&amp;gt;Bikes: {{station.bikes}} - Slots {{station.slots}}&amp;lt;/div&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                &amp;lt;/li&amp;gt;
+            &amp;lt;/ul&amp;gt;
+        &amp;lt;/div&amp;gt;
+        &amp;lt;script src&#x3D;&amp;quot;js/axios.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+        &amp;lt;script src&#x3D;&amp;quot;js/vue.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+        &amp;lt;script src&#x3D;&amp;quot;js/app.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+    &amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As you can see we load vue.js here, which will load a view for us based on the data that is coming back from
+our http request. To keep things simple, this data is a local JSON file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var app &#x3D; new Vue({
+    el: &#x27;#app&#x27;,
+    data: {
+        stations: []
+    },
+    beforeMount: function () {
+        this.loadStations();
+    },
+    methods: {
+        loadStations: function () {
+            var self &#x3D; this;
+            axios.get(&#x27;/stations.json&#x27;)
+                .then(function (response) {
+                    self.stations &#x3D; response.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will also have some CSS for a basic design and to make this app responsive.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;body { color: #242729; font: 15px/1.3 Arial,&amp;quot;Helvetica Neue&amp;quot;,Helvetica,sans-serif; margin: 40px 0; }
+small { color: #999; }
+#app { margin: 0 auto; max-width: 700px; }
+#logo { margin-bottom: 40px; text-align: center; }
+#logo img { width: 100px; height: auto; }
+ul.stations { list-style: none; margin: 0 20px; padding: 0; position: relative; }
+ul.stations li { border-bottom: 1px solid #e4e6e8; }
+ul.stations li div.station { margin-bottom: 10px; margin-top: 10px; margin-left: 58px; }
+ul.stations li div.station:after { content: &#x27;&#x27;; display: block; clear: both; }
+ul.stations li div.station div.status { border-radius: 50%; float: left; margin-left: -58px; width: 48px; }
+ul.stations li div.station div.status img { width: 48px; }
+div.info {background-color: #d9edf7; color: #31708f; border-radius: 16px; word-wrap: break-word; padding: 20px; margin-bottom: 20px;}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To see the example for yourself, type the following commands:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g browser-sync
+npm start&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The app will now render beautifully on the different browsers.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_getting_started.png&quot; alt&#x3D;&quot;getting started&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id&#x3D;&quot;service_workers&quot;&gt;Service workers&lt;/h1&gt;
+
+&lt;p&gt;&lt;a href&#x3D;&quot;https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API&quot;&gt;Service workers&lt;/a&gt; are a
+big part of PWAs. They allow you to develop &lt;a href&#x3D;&quot;http://offlinefirst.org/&quot;&gt;offline first&lt;/a&gt;.
+A service worker is a javascript process that runs separately and acts as a programmable proxy
+between your application and the network. To avoid
+&lt;a href&#x3D;&quot;https://en.wikipedia.org/wiki/Man-in-the-middle_attack&quot;&gt;man-in-the-middle attacks&lt;/a&gt;, service workers
+have to run over https.&lt;/p&gt;
+
+&lt;p&gt;In order to notify the browser that you have a service worker available, you have to register it on load.
+We do this in the our &lt;code&gt;app.js&lt;/code&gt; file. We also check if serviceWorker is a know feature in our browser, so when it&#x27;s not,
+the app will not crash.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;if (&#x27;serviceWorker&#x27; in navigator) {
+    navigator.serviceWorker.register(&#x27;/sw.js&#x27;).then(function() {
+        console.log(&#x27;ServiceWorker registration successful&#x27;);
+    }).catch(function(err) {
+        console.log(&#x27;ServiceWorker registration failed: &#x27;, err);
+    });
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you look at the code, you see that we register a seperate javascript file here. This is necassary as the service worker will run
+seperate from your other javascript code. The service worker also has no access to your DOM. &lt;code&gt;sw.js&lt;/code&gt; should be created at the root-level, so
+not inside the js-folder.&lt;/p&gt;
+
+&lt;p&gt;Let&#x27;s create &lt;code&gt;sw.js&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-javascript&quot;&gt;var CACHE_NAME &#x3D; &#x27;my-bike-v1 &#x27;;
+var CACHED_URLS &#x3D; [
+    &#x27;/&#x27;,
+    &#x27;/img/favicon.png&#x27;,
+    &#x27;/img/icon-120.png&#x27;,
+    &#x27;/img/icon-144.png&#x27;,
+    &#x27;/img/icon-152.png&#x27;,
+    &#x27;/img/icon-192.png&#x27;,
+    &#x27;/img/icon-384.png&#x27;,
+    &#x27;/img/logo.png&#x27;,
+    &#x27;/img/status-available.png&#x27;,
+    &#x27;/img/status-closed.png&#x27;,
+    &#x27;/img/status-empty.png&#x27;,
+    &#x27;/img/status-full.png&#x27;,
+    &#x27;/js/axios.min.js&#x27;,
+    &#x27;/js/vue.min.js&#x27;,
+    &#x27;/js/app.js&#x27;,
+    &#x27;/main.css&#x27;
+];
+
+self.addEventListener(&#x27;install&#x27;, function(event) {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(function(cache) {
+            return cache.addAll(CACHED_URLS);
+        })
+    );
+
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;What happens here? A service worker has a specific &lt;a href&#x3D;&quot;https://developers.google.com/web/fundamentals/instant-and-offline/service-worker/lifecycle&quot;&gt;lifecycle&lt;/a&gt;
+When a service worker is found, the browser will try to install it. &lt;code&gt;CACHED_URLS&lt;/code&gt; contains all url&#x27;s that need to be cached. This idea
+follows the &lt;a href&#x3D;&quot;https://developers.google.com/web/fundamentals/architecture/app-shell&quot;&gt;app shell architecture&lt;/a&gt;, where you cache all static assets, to startup the
+application very quickly. In our case, these are all used files, without the station.json file, as this is the dynamic data here.&lt;/p&gt;
+
+&lt;p&gt;If you try to cache a file that cannot be retrieved, the service worker won&#x27;t be installed&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_error_sw.png&quot; alt&#x3D;&quot;Service Worker failed to install&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Once the ServiceWorker is installed, we can listen to the activate-event.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-javascript&quot;&gt;self.addEventListener(&#x27;activate&#x27;, function(event) {
+    event.waitUntil(
+        caches.keys().then(function(cacheNames) {
+            cacheNames.map(function(cacheName) {
+                if (CACHE_NAME !&#x3D;&#x3D; cacheName &amp;amp;&amp;amp; cacheName.startsWith(&#x27;my-bike&#x27;)) {
+                    return caches.delete(cacheName);
+                }
+            })
+        })
+    );
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There is a difference between a ServiceWorker being installed and the ServiceWorker becoming activated.
+In our code, we want to listen to activate-events, because when a new version of the ServiceWorker becomes active, we want
+to delete our old cache. This is also why &lt;code&gt;CACHE_NAME&lt;/code&gt; has a version (v1) in it&#x27;s name. A new version will become v2.&lt;/p&gt;
+
+&lt;p&gt;The last part are fetch &#x27;events&#x27;. When the service worker is installed, every request will trigger a fetch event. Inside this event, we can now
+return our cached resource, if we have one available.&lt;/p&gt;
+
+&lt;p&gt;Keep in mind that cached resource are only returned the second time
+you visit the application, as the first time you were still installing it. Also keep in mind that when you develop,
+especially on localhost, that the cache will kick it. Don&#x27;t forget to clear the cache, or just to open a private window
+so you don&#x27;t get confused.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-javascript&quot;&gt;self.addEventListener(&#x27;fetch&#x27;, function(event) {
+    event.respondWith(
+        caches.match(event.request).then(function(response) {
+            if (response) {
+                return response;
+            }
+            return fetch(event.request);
+        })
+    );
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There are a lot of &lt;a href&#x3D;&quot;https://github.com/tjoskar/service-worker-exercises&quot;&gt;examples&lt;/a&gt; available for service workers.
+Keep in mind that service workers are a relatively new feature, so
+&lt;a href&#x3D;&quot;https://jakearchibald.github.io/isserviceworkerready&quot;&gt;not all browsers support all features yet&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;web_app_manifest&quot;&gt;Web App Manifest&lt;/h2&gt;
+
+&lt;p&gt;A web app manifest is a JSON file that follows the &lt;a href&#x3D;&quot;https://www.w3.org/TR/appmanifest&quot;&gt;W3C’s specification&lt;/a&gt;. It gives
+some metadata and notifies the browser that this application can be installed on the home screen.&lt;/p&gt;
+
+&lt;p&gt;The file should be added as a link-tag in the html file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;link rel&#x3D;&amp;quot;manifest&amp;quot; href&#x3D;&amp;quot;manifest.json&amp;quot;&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The file itself is a json-file with the options that you specify.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;MyBike&amp;quot;,
+  &amp;quot;short_name&amp;quot;: &amp;quot;MyBike&amp;quot;,
+  &amp;quot;start_url&amp;quot;: &amp;quot;.&amp;quot;,
+  &amp;quot;display&amp;quot;: &amp;quot;standalone&amp;quot;,
+  &amp;quot;theme_color&amp;quot;: &amp;quot;#fff&amp;quot;,
+  &amp;quot;background_color&amp;quot;: &amp;quot;#fff&amp;quot;,
+  &amp;quot;orientation&amp;quot;: &amp;quot;portrait&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;An app for renting bikes&amp;quot;,
+  &amp;quot;icons&amp;quot;: [{
+    &amp;quot;src&amp;quot;: &amp;quot;img/icon-120.png&amp;quot;,
+    &amp;quot;sizes&amp;quot;: &amp;quot;120x120&amp;quot;,
+    &amp;quot;type&amp;quot;: &amp;quot;image/png&amp;quot;
+  }, {
+    &amp;quot;src&amp;quot;: &amp;quot;img/icon-144.png&amp;quot;,
+    &amp;quot;sizes&amp;quot;: &amp;quot;144x144&amp;quot;,
+    &amp;quot;type&amp;quot;: &amp;quot;image/png&amp;quot;
+  }, {
+    &amp;quot;src&amp;quot;: &amp;quot;img/icon-152.png&amp;quot;,
+    &amp;quot;sizes&amp;quot;: &amp;quot;152x152&amp;quot;,
+    &amp;quot;type&amp;quot;: &amp;quot;image/png&amp;quot;
+  }, {
+    &amp;quot;src&amp;quot;: &amp;quot;img/icon-192.png&amp;quot;,
+    &amp;quot;sizes&amp;quot;: &amp;quot;192x192&amp;quot;,
+    &amp;quot;type&amp;quot;: &amp;quot;image/png&amp;quot;
+  },{
+    &amp;quot;src&amp;quot;: &amp;quot;img/icon-384.png&amp;quot;,
+    &amp;quot;sizes&amp;quot;: &amp;quot;384x384&amp;quot;,
+    &amp;quot;type&amp;quot;: &amp;quot;image/png&amp;quot;
+  }]
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The display option represents the preferred display mode, once it is opened from the home screen.
+In most cases, standalone will be the best option for a progressive web app.&lt;/p&gt;
+
+&lt;p&gt;If you configured the web app manifest correctly, the browser might decide to show an
+&lt;a href&#x3D;&quot;https://developers.google.com/web/fundamentals/engage-and-retain/app-install-banners/&quot;&gt;Install Banner&lt;/a&gt;. When and if
+the install banner is opened is browser-specifc and can be changed over time.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_install_banner.png&quot; alt&#x3D;&quot;install banner&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;local_storage&quot;&gt;Local Storage&lt;/h2&gt;
+
+&lt;p&gt;The web has many features available that help create an app-like experience, like
+&lt;a href&#x3D;&quot;https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage&quot;&gt;LocalStorage&lt;/a&gt;. We will now keep
+track of the lastUpdate-date. This date is only updated when we fetch the stations from our server.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var app &#x3D; new Vue({
+    el: &#x27;#app&#x27;,
+    data: {
+        lastUpdated: null,
+        stations: []
+    },
+    beforeMount: function () {
+        if (&#x27;serviceWorker&#x27; in navigator) {
+            navigator.serviceWorker.register(&#x27;/sw.js&#x27;).then(function() {
+                console.log(&#x27;ServiceWorker registration successful&#x27;);
+            }).catch(function(err) {
+                console.log(&#x27;ServiceWorker registration failed: &#x27;, err);
+            });
+        }
+
+        this.loadStations();
+        this.lastUpdated &#x3D; localStorage.lastUpdated;
+    },
+    methods: {
+        loadStations: function () {
+            var self &#x3D; this;
+            axios.get(&#x27;/stations.json&#x27;)
+                .then(function (response) {
+                    self.stations &#x3D; response.data;
+                    self.lastUpdated &#x3D; new Date().toLocaleString();
+                    localStorage.lastUpdated &#x3D;  self.lastUpdated;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will be shown on the &lt;code&gt;index.html&lt;/code&gt;-file below the logo:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;div id&#x3D;&amp;quot;logo&amp;quot;&amp;gt;
+    &amp;lt;img src&#x3D;&amp;quot;img/logo.png&amp;quot; alt&#x3D;&amp;quot;MyBike&amp;quot; /&amp;gt;
+    &amp;lt;p&amp;gt;&amp;lt;small&amp;gt;Last Updated: {{lastUpdated}}&amp;lt;/small&amp;gt;&amp;lt;/p&amp;gt;
+&amp;lt;/div&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;geolocation&quot;&gt;Geolocation&lt;/h2&gt;
+
+&lt;p&gt;We can now install our app and make sure that it loads fast and works offline. Next step is to find the closest station.
+We can use the &lt;a href&#x3D;&quot;https://developers.google.com/maps/documentation/javascript/examples/map-geolocation&quot;&gt;Geolocation API&lt;/a&gt; and
+get the current position. Once we retrieve it, we can sort the list based on the closest station.&lt;/p&gt;
+
+&lt;p&gt;I used this &lt;a href&#x3D;&quot;http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula&quot;&gt;Stackoverflow Answer&lt;/a&gt;
+to calculate the number of kilometers between my coordinations and the ones described for the station.
+The distance is set dynamically, so we need to use the &lt;a href&#x3D;&quot;https://vuejs.org/v2/guide/reactivity.html&quot;&gt;Vue-set method&lt;/a&gt; and we round it to 1 decimal.&lt;/p&gt;
+
+&lt;p&gt;We add the distance to the view:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;small v-if&#x3D;&amp;quot;station.distance&amp;quot;&amp;gt;{{station.distance}}km&amp;lt;/small&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And then we add all functionality to the app.js file to get the current location and sort the stations accordingly.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var app &#x3D; new Vue({
+    el: &#x27;#app&#x27;,
+    data: {
+        position: null,
+        lastUpdated: null,
+        stations: []
+    },
+    beforeMount: function () {
+        if (&#x27;serviceWorker&#x27; in navigator) {
+            navigator.serviceWorker.register(&#x27;/sw.js&#x27;).then(function() {
+                console.log(&#x27;ServiceWorker registration successful&#x27;);
+            }).catch(function(err) {
+                console.log(&#x27;ServiceWorker registration failed: &#x27;, err);
+            });
+        }
+        if (&#x27;geolocation&#x27; in navigator) {
+            navigator.geolocation.getCurrentPosition(this.locatePosition);
+        }
+
+        this.loadStations();
+        this.lastUpdated &#x3D; localStorage.lastUpdated;
+    },
+    methods: {
+        deg2rad: function (deg) {
+            return deg * (Math.PI / 180)
+        },
+        getDistanceFromLatLonInKm: function (lat1, lon1, lat2, lon2) {
+            var R &#x3D; 6371;
+            var dLat &#x3D; this.deg2rad(lat2 - lat1);
+            var dLon &#x3D; this.deg2rad(lon2 - lon1);
+            var a &#x3D;
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c &#x3D; 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var d &#x3D; R * c;
+            return d;
+        },
+        loadStations: function () {
+            axios.get(&#x27;/stations.json&#x27;)
+                .then(function (response) {
+                    this.stations &#x3D; response.data;
+                    this.lastUpdated &#x3D; new Date().toLocaleString();
+                    localStorage.lastUpdated &#x3D;  this.lastUpdated;
+                }.bind(this))
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        locatePosition: function (position) {
+            this.position &#x3D; position.coords;
+            this.sort();
+        },
+        sort: function() {
+            for(var i in this.stations) {
+                var distance &#x3D; this.getDistanceFromLatLonInKm(this.stations[i].lat, this.stations[i].lon, this.position.latitude, this.position.longitude);
+                Vue.set(this.stations[i], &#x27;distance&#x27;, Math.round(distance * 10) / 10);
+            }
+            this.stations.sort(function(a, b) {
+                return a.distance - b.distance;
+            });
+        }
+    }
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id&#x3D;&quot;push_notifications&quot;&gt;Push Notifications&lt;/h2&gt;
+
+&lt;p&gt;For our final touch, we implement push notifications to engage users to use our app. Push notifications for progressive web apps work in 2 parts: &lt;a href&#x3D;&quot;https://notifications.spec.whatwg.org&quot;&gt;Web Notifications&lt;/a&gt; and the &lt;a href&#x3D;&quot;https://w3c.github.io/push-api&quot;&gt;Push API&lt;/a&gt;.
+Web notifications look like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_notifications.png&quot; alt&#x3D;&quot;Web Notifications&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We can show this, when a push-event is triggered in our service worker:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;self.addEventListener(&#x27;push&#x27;, function(event) {
+    event.waitUntil(self.registration.showNotification(&#x27;MyBike&#x27;, {
+        body: event.data.text(),
+        icon: &#x27;img/icon-192.png&#x27;
+    }));
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Service workers can be triggered, even if the user is not using our app at the moment. If the user clicks on the push notification, we want him to go
+back to the app.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;self.addEventListener(&#x27;notificationclick&#x27;, function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(&#x27;https://www.velo-antwerpen.be/en/news&#x27;)
+    );
+});&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that we have to notification part right, we should subscribe our user to push notifications from our app. First we change the index.html:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;div id&#x3D;&amp;quot;logo&amp;quot;&amp;gt;
+    &amp;lt;img src&#x3D;&amp;quot;img/logo.png&amp;quot; alt&#x3D;&amp;quot;MyBike&amp;quot; /&amp;gt;
+    &amp;lt;p&amp;gt;
+        &amp;lt;small v-if&#x3D;&amp;quot;lastUpdated&amp;quot;&amp;gt;Last Updated: {{lastUpdated}} -
+            &amp;lt;a v-if&#x3D;&amp;quot;!subscription&amp;quot; href&#x3D;&amp;quot;javascript:void(0)&amp;quot; v-on:click&#x3D;&amp;quot;subscribe()&amp;quot;&amp;gt;Enable notifications&amp;lt;/a&amp;gt;
+            &amp;lt;a v-if&#x3D;&amp;quot;subscription&amp;quot; href&#x3D;&amp;quot;javascript:void(0)&amp;quot; v-on:click&#x3D;&amp;quot;unsubscribe()&amp;quot;&amp;gt;Disable notifications&amp;lt;/a&amp;gt;
+        &amp;lt;/small&amp;gt;
+    &amp;lt;/p&amp;gt;
+&amp;lt;/div&amp;gt;
+
+&amp;lt;div v-if&#x3D;&amp;quot;subscription&amp;quot; class&#x3D;&amp;quot;info&amp;quot;&amp;gt;
+    {{subscription}}
+&amp;lt;/div&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We now show enable/disable push notifications so the user can toggle his subscription. If we have a subscription we
+show it on the page, so we can later copy it to test the push notification. As you can see, there are 2 new functions here: subscribe() and unsubscribe().
+Let&#x27;s implement this in our app.js:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;subscribe: function() {
+    const publicKey &#x3D; &amp;quot;&amp;lt;YOUR_PUBLIC_KEY&amp;gt;&amp;quot;
+    const applicationServerKey &#x3D; this.urlB64ToUint8Array(publicKey);
+    this.swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey
+    }).then(function(subscription) {
+        console.log(&#x27;User is subscribed.&#x27;);
+        this.subscription &#x3D; subscription;
+    }.bind(this));
+},
+unsubscribe: function() {
+    this.swRegistration.pushManager.getSubscription()
+        .then(function(subscription) {
+            if (subscription) {
+                subscription.unsubscribe();
+                this.subscription &#x3D; null;
+                console.log(&#x27;User is unsubscribed.&#x27;);
+            }
+        }.bind(this))
+},
+urlB64ToUint8Array: function (base64String) {
+    const padding &#x3D; &#x27;&#x3D;&#x27;.repeat((4 - base64String.length % 4) % 4);
+    const base64 &#x3D; (base64String + padding)
+        .replace(/\-/g, &#x27;+&#x27;)
+        .replace(/_/g, &#x27;/&#x27;);
+
+    const rawData &#x3D; window.atob(base64);
+    const outputArray &#x3D; new Uint8Array(rawData.length);
+    for (var i &#x3D; 0; i &amp;lt; rawData.length; ++i) {
+        outputArray[i] &#x3D; rawData.charCodeAt(i);
+    }
+    return outputArray;
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to send push notifications, we need to have a push notification server. We will use Google&#x27;s &lt;a href&#x3D;&quot;https://web-push-codelab.appspot.com/&quot;&gt;Push Companion&lt;/a&gt; website for this.
+In the above code, replace &amp;quot;&amp;lt;YOUR_PUBLIC_KEY&amp;gt;&amp;quot; with the public key that is generated for you on the Push Companion website:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_web_companion_site.png&quot; alt&#x3D;&quot;web companion site&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Reload the MyBike-application and press &#x27;Enable notifications&#x27;. After a few moments, the text should switch to &#x27;Disable notifications&#x27;, meaning that we are now subscribed, and you can
+disable them again when needed. The subscription itself is shown in blue.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_push_subscription_info.png&quot; alt&#x3D;&quot;subscription info&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Copy the subscription and paste it in the Push Companion site:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src&#x3D;&quot;/img/pwa_send_push_message.png&quot; alt&#x3D;&quot;send push message&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You should now see the same notification message as before, but then triggered by the push notification service.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;PWAs are not a replacement for native apps. Native apps will always have better integration with the mobile OS. Where PWAs will help, is anwser the
+question if it is still relevant to build a native apps that is just a container around already existing web content. This means we both
+get better quality web apps and better quality native apps.&lt;/p&gt;
+
+&lt;p&gt;You can transform any web application to a progressive web app in a few hours. While they won&#x27;t work on all platforms yet, they can
+add value today where they do work. PWAs, but especially service workers, are an exciting development to make the web better.&lt;/p&gt;
+
+&lt;h2 id&#x3D;&quot;info&quot;&gt;Info&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Published: May 15, 2017&lt;/li&gt;
+  &lt;li&gt;Last updated: Nov 14, 2017&lt;/li&gt;
+  &lt;li&gt;Source code: &lt;a href&#x3D;&quot;https://github.com/codeaddslife/demo-pwa&quot;&gt;https://github.com/codeaddslife/demo-pwa&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description>
+        </item>
+    </channel>
+</rss>
